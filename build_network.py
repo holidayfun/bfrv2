@@ -94,7 +94,6 @@ class NetworkTopo(Topo):
 				thrift_port=thrift_port,
 				pcap_dump=pcap_dump,
 				inNamespace = True)
-	    thrift_port += 1
             for host in switch['hosts']:
                 h = self.addHost(host['name'], ip=host['ip'], mac=host['mac'])
                 self.addLink(s, h)
