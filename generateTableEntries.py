@@ -72,7 +72,7 @@ def add_all_entries(ip_entry, forward_entry, send_frame_entry, switch_name, thri
     add_send_frame_entry(send_frame_entry, switch_name, thrift_server, thrift_port)
 
 def add_ip_entry(entry, switch_name, thrift_server, thrift_port=22222):
-    handle_cmd("table_add ipv4_lpm set_nhop {entry[ip]}/{entry[prefix_len]} => {entry[next_hop]} {entry[action_port]}".format(entry=entry), switch_name, thrift_server, thrift_port)
+    handle_cmd("table_add ipv4_lpm set_nhop {entry[ip]}/{entry[prefix_len]} => {entry[next_hop]} {entry[action_port]:04d}".format(entry=entry), switch_name, thrift_server, thrift_port)
 def add_forward_entry(entry, switch_name, thrift_server, thrift_port=22222):
     handle_cmd("table_add forward set_dmac {entry[ip]} => {entry[dmac]}".format(entry=entry), switch_name, thrift_server, thrift_port)
 def add_send_frame_entry(entry, switch_name, thrift_server, thrift_port=22222):
