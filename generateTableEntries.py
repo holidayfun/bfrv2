@@ -4,7 +4,7 @@ import json
 
 p4_name = 'bfr'
 thrift_client_module = "p4_pd_rpc.bfr"
-file_templ = 'table_entries/entries_{0}.bash'
+file_templ = 'table_entries/entries_{0}'
 
 def main():
     network = json.load(open('RingNetwork.json', 'r'))
@@ -22,14 +22,12 @@ def main():
             ip_entry = {'ip': host['ip'], 'prefix_len': 32, 'next_hop': host['ip'], 'action_port': action_port}
             forward_entry = {'ip': host['ip'], 'dmac': host['mac']}
             send_frame_entry = {'port': action_port, 'rewrite_mac': host['switch_mac']}
-            append_entry_file('echo "Entries for {0}"\n'.format(host['name']), switch['name'])
             add_all_entries(ip_entry, forward_entry, send_frame_entry, switch['name'], thrift_server)
             action_port += 1
     #adding entries for other subnets
     for switch in network['switches']:
         action_port = len(switch['hosts']) + 1
         thrift_server = switch['control_network_ip']
-        append_entry_file('echo "Entries for switch interconnects"\n', switch['name'])
 
         for link in network['switch_links']:
             if switch['name'] in [link['node1']['name'], link['node2']['name']]:
@@ -61,8 +59,7 @@ def append_entry_file(line, switch_name):
         fh.write(line)
 
 def handle_cmd(cmd, switch_name, thrift_server, thrift_port=22222):
-    append_entry_file('python ../../../cli/pd_cli.py -p {0} -i {1} -s $PWD/../tests/pd_thrift:$PWD/../../../testutils -m "{2}" -c {3}:{4}\n'
-                        .format(p4_name, thrift_client_module, cmd, thrift_server, thrift_port), switch_name)
+    append_entry_file('{0}\n'.format(cmd), switch_name)
 
 def add_all_entries(ip_entry, forward_entry, send_frame_entry, switch_name, thrift_server, thrift_port=22222):
     add_ip_entry(ip_entry, switch_name, thrift_server, thrift_port)
@@ -70,11 +67,11 @@ def add_all_entries(ip_entry, forward_entry, send_frame_entry, switch_name, thri
     add_send_frame_entry(send_frame_entry, switch_name, thrift_server, thrift_port)
 
 def add_ip_entry(entry, switch_name, thrift_server, thrift_port=22222):
-    handle_cmd("add_entry ipv4_lpm {entry[ip]} {entry[prefix_len]} set_nhop {entry[next_hop]} {entry[action_port]}".format(entry=entry), switch_name, thrift_server, thrift_port)
+    handle_cmd("table_add ipv4_lpm set_nhop {entry[ip]}/{entry[prefix_len]} => {entry[next_hop]} {entry[action_port]}".format(entry=entry), switch_name, thrift_server, thrift_port)
 def add_forward_entry(entry, switch_name, thrift_server, thrift_port=22222):
-    handle_cmd("add_entry forward {entry[ip]} set_dmac {entry[dmac]}".format(entry=entry), switch_name, thrift_server, thrift_port)
+    handle_cmd("table_add forward set_dmac {entry[ip]} => {entry[dmac]}".format(entry=entry), switch_name, thrift_server, thrift_port)
 def add_send_frame_entry(entry, switch_name, thrift_server, thrift_port=22222):
-    handle_cmd("add_entry send_frame {entry[port]} rewrite_mac {entry[rewrite_mac]}".format(entry=entry), switch_name, thrift_server, thrift_port)
+    handle_cmd("table_add send_frame rewrite_mac {entry[port]} => {entry[rewrite_mac]}".format(entry=entry), switch_name, thrift_server, thrift_port)
 
 def jprint(data):
     print(json.dumps(data, sort_keys=True, indent=4, separators=(',', ': ')))
@@ -82,51 +79,3 @@ def jprint(data):
 
 if __name__ == "__main__":
     main()
-
-
-
-
-#adding entries to other swiches in subnet
-
-
-
-#jprint(switches)
-
-
-
-
-
-
-# #adding IP lpm rules
-# if create_entry_file:
-#     entry_file.write('echo "IPv4 lpm rules"\n')
-#
-# entries = [ {'ip': '10.0.3.1', 'prefix_len': 32, 'next_hop': '10.0.3.1', 'action_port': 1},
-#             {'ip': '10.0.0.0', 'prefix_len': 16, 'next_hop': '10.0.3.1', 'action_port': 1}]
-# for entry in entries:
-#     handle_cmd("add_entry ipv4_lpm {entry[ip]} {entry[prefix_len]} set_nhop {entry[next_hop]} {entry[action_port]}".format(entry=entry))
-#
-# #adding Send Frame rules
-# if create_entry_file:
-#     entry_file.write('echo "Send Frame rules"\n')
-#
-# entries = [ {'port': 1, 'rewrite_mac': '00:00:00:00:05:01'}]
-# for entry in entries:
-#     handle_cmd("add_entry send_frame {entry[port]} rewrite_mac {entry[rewrite_mac]}".format(entry=entry))
-#
-# #adding Forward rules
-# if create_entry_file:
-#     entry_file.write('echo "Forward rules"\n')
-#
-# entries = [ {'ip': '10.0.3.1', 'dmac': '00:00:00:00:02:02'}]
-# for entry in entries:
-#     handle_cmd("add_entry forward {entry[ip]} set_dmac {entry[dmac]}".format(entry=entry))
-#
-
-
-
-
-# s1
-# entries = [ {'ip': '10.0.4.0', 'prefix_len': 24, 'next_hop': '10.0.4.2', 'action_port': 1}]
-# entries = [ {'port': 1, 'rewrite_mac': '00:00:00:00:01:01'}]
-# entries = [ {'ip': '10.0.4.2', 'dmac': '00:00:00:00:02:01'}]
