@@ -154,13 +154,14 @@ class P4Router(P4Switch):
 	if self.thrift_port:
 	    args.extend(['--thrift-port', str(self.thrift_port)])
 	if self.nanomsg:
+            print(self.nanomsg)
 	    args.extend(['--nanolog', self.nanomsg])
 	args.extend(['--device-id', str(self.device_id)])
 	P4Switch.device_id += 1
 	args.append(self.json_path)
 	if self.enable_debugger:
 	    args.append('--debugger')
-
+        print(' '.join(args) + ' >' + self.logfile + ' 2>&1 </dev/null &')
         self.cmd(' '.join(args) + ' >' + self.logfile + ' 2>&1 </dev/null &' , verbose=True)
 
 if __name__ == "__main__":
