@@ -16,6 +16,11 @@ def main():
     for switch in network['switches']:
         switches[switch['name']] = switch
         thrift_server = switch['control_network_ip']
+        #Defaults
+
+        append_entry_file("table_set_default ipv4_lpm _drop", switch['name'])
+        append_entry_file("table_set_default forward _drop", switch['name'])
+        append_entry_file("table_set_default send_frame _drop", switch['name'])
         #Einträge für Hosts, die am switch hängen
         action_port = 1 #port nummerierung wi folgt: h1 -> 1, h2 -> 2,...
         for host in switch['hosts']:
@@ -56,10 +61,10 @@ def silent_rm(path):
 
 def append_entry_file(line, switch_name):
     with open(file_templ.format(switch_name), 'a') as fh:
-        fh.write(line)
+        fh.write(line + "\n")
 
 def handle_cmd(cmd, switch_name, thrift_server, thrift_port=22222):
-    append_entry_file('{0}\n'.format(cmd), switch_name)
+    append_entry_file('{0}'.format(cmd), switch_name)
 
 def add_all_entries(ip_entry, forward_entry, send_frame_entry, switch_name, thrift_server, thrift_port=22222):
     add_ip_entry(ip_entry, switch_name, thrift_server, thrift_port)
