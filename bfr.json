@@ -336,36 +336,8 @@
     "meter_arrays": [],
     "actions": [
         {
-            "name": "rewrite_mac",
-            "id": 0,
-            "runtime_data": [
-                {
-                    "name": "smac",
-                    "bitwidth": 48
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "ethernet",
-                                "srcAddr"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "set_nhop",
-            "id": 1,
+            "id": 0,
             "runtime_data": [
                 {
                     "name": "nhop_ipv4",
@@ -400,7 +372,7 @@
                             "type": "field",
                             "value": [
                                 "standard_metadata",
-                                "egress_spec"
+                                "egress_port"
                             ]
                         },
                         {
@@ -429,12 +401,40 @@
         },
         {
             "name": "_drop",
-            "id": 2,
+            "id": 1,
             "runtime_data": [],
             "primitives": [
                 {
                     "op": "drop",
                     "parameters": []
+                }
+            ]
+        },
+        {
+            "name": "rewrite_mac",
+            "id": 2,
+            "runtime_data": [
+                {
+                    "name": "smac",
+                    "bitwidth": 48
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "ethernet",
+                                "srcAddr"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
                 }
             ]
         },
