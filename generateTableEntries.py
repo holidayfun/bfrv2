@@ -4,7 +4,7 @@ import json
 
 p4_name = 'bfr'
 thrift_client_module = "p4_pd_rpc.bfr"
-file_templ = 'table_entries/entries_{0}'
+file_templ = 'table_manipulation/entries_{0}'
 
 def main():
     network = json.load(open('RingNetwork.json', 'r'))
