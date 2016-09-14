@@ -13,6 +13,32 @@ header_type routing_metadata_t {
 
 metadata routing_metadata_t routing_metadata;
 
+action add_bier_header(bitstring) {
+    add_header(bier);
+    modify_field(bier.BitString, bitstring);
+}
+
+table bier_enables {
+    reads {
+      ipv4.dstAddr : exact
+    }
+    actions {
+      add_bier_header;
+      _drop;
+    }
+    size: 256;
+}
+
+control ingress {
+    apply(ipv4_lpm);
+    apply(forward);
+}
+
+control egress {
+    apply(send_frame);
+}
+
+
 action set_nhop(nhop_ipv4, port) {
     modify_field(routing_metadata.nhop_ipv4, nhop_ipv4);
     modify_field(standard_metadata.egress_spec, port);
@@ -58,25 +84,4 @@ table send_frame {
         _drop;
     }
     size: 256;
-}
-
-
-table bier_packet {
-    reads {
-	ipv4.dstAddr : lpm;
-    }
-    actions {
-    	_drop;
-    }
-    size: 256;
-}
-
-
-control ingress {
-    apply(ipv4_lpm);
-    apply(forward);
-}
-
-control egress {
-    apply(send_frame);
 }
