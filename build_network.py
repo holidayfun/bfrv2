@@ -5,7 +5,7 @@ from mininet.net import Mininet
 from mininet.topo import Topo
 from mininet.log import setLogLevel, info
 from mininet.cli import CLI
-from mininet.node import Node, RemoteController
+from mininet.node import Node, RemoteController, Switch
 from p4_mininet import P4Switch, P4Host
 import argparse
 #from time import sleep
@@ -132,11 +132,28 @@ class P4Router(P4Switch):
 			device_id=None,
 			enable_debugger=True,
 			**kwargs ):
-        P4Switch.__init__(self, name, sw_path, json_path, thrift_port,
-				pcap_dump, verbose, device_id,
-				enable_debugger, **kwargs)
+        #P4Switch.__init__(self, name, sw_path, json_path, thrift_port,
+	#			pcap_dump, verbose, device_id,
+	#			enable_debugger, **kwargs)
+        Switch.__init__(self, name, **kwargs)
+
+        assert(sw_path)
+        assert(json_path)
+        self.sw_path = sw_path
+        self.json_path = json_path
+        self.verbose = verbose
         self.logfile = '/tmp/p4s.%s.log' % self.name
-	print(">>>>>>thrift_port: {0}".format(thrift_port))
+        self.thrift_port = thrift_port
+        self.pcap_dump = pcap_dump
+        self.enable_debugger = enable_debugger
+        self.nanomsg = "ipc:///bm-%d-log.ipc" % self.device_id
+        if device_id is not None:
+            self.device_id = device_id
+            P4Switch.device_id = max(P4Switch.device_id, device_id)
+        else:
+            self.device_id = P4Switch.device_id
+            P4Switch.device_id += 1
+
     def start( self, controllers ):
         "Start up a new P4 Router"
         args = [self.sw_path]
@@ -160,9 +177,17 @@ class P4Router(P4Switch):
 	args.append(self.json_path)
 	if self.enable_debugger:
 	    args.append('--debugger')
-        print(' '.join(args) + ' >' + self.logfile + ' 2>&1 </dev/null &')
-        self.cmd(' '.join(args) + ' >' + self.logfile + ' 2>&1 </dev/null &' , verbose=True)
 
+        #logging
+        args.extend(['--log-file', self.logfile])
+        args.append('--log-flush')
+
+        print(' '.join(args) + '  2>&1 </dev/null &')
+        self.cmd(' '.join(args) + '  2>&1 </dev/null &' , verbose=True)
+    def stop(self):
+        self.cmd('kill %' + self.sw_path)
+        self.cmd('wait')
+        self.deleteIntfs()
 if __name__ == "__main__":
     setLogLevel('debug')
     parser = argparse.ArgumentParser(description='Mininet demo')
