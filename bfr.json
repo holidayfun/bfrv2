@@ -41,8 +41,28 @@
             "max_length": null
         },
         {
-            "name": "bier_t",
+            "name": "intrinsic_metadata_t",
             "id": 1,
+            "fields": [
+                [
+                    "mcast_grp",
+                    4
+                ],
+                [
+                    "egress_rid",
+                    4
+                ],
+                [
+                    "mcast_hash",
+                    16
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "bier_t",
+            "id": 2,
             "fields": [
                 [
                     "first_nibble",
@@ -86,7 +106,7 @@
         },
         {
             "name": "ethernet_t",
-            "id": 2,
+            "id": 3,
             "fields": [
                 [
                     "dstAddr",
@@ -106,7 +126,7 @@
         },
         {
             "name": "ipv4_t",
-            "id": 3,
+            "id": 4,
             "fields": [
                 [
                     "version",
@@ -162,7 +182,7 @@
         },
         {
             "name": "routing_metadata_t",
-            "id": 4,
+            "id": 5,
             "fields": [
                 [
                     "nhop_ipv4",
@@ -202,6 +222,12 @@
             "name": "routing_metadata",
             "id": 4,
             "header_type": "routing_metadata_t",
+            "metadata": true
+        },
+        {
+            "name": "intrinsic_metadata",
+            "id": 5,
+            "header_type": "intrinsic_metadata_t",
             "metadata": true
         }
     ],
@@ -336,8 +362,103 @@
     "meter_arrays": [],
     "actions": [
         {
-            "name": "set_nhop",
+            "name": "rewrite_mac",
             "id": 0,
+            "runtime_data": [
+                {
+                    "name": "smac",
+                    "bitwidth": 48
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "ethernet",
+                                "srcAddr"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "set_mc_group",
+            "id": 1,
+            "runtime_data": [
+                {
+                    "name": "group_id",
+                    "bitwidth": 4
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "intrinsic_metadata",
+                                "mcast_grp"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "_drop",
+            "id": 2,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "drop",
+                    "parameters": []
+                }
+            ]
+        },
+        {
+            "name": "set_dmac",
+            "id": 3,
+            "runtime_data": [
+                {
+                    "name": "dmac",
+                    "bitwidth": 48
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "ethernet",
+                                "dstAddr"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "set_nhop",
+            "id": 4,
             "runtime_data": [
                 {
                     "name": "nhop_ipv4",
@@ -398,84 +519,46 @@
                     ]
                 }
             ]
-        },
-        {
-            "name": "_drop",
-            "id": 1,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "drop",
-                    "parameters": []
-                }
-            ]
-        },
-        {
-            "name": "rewrite_mac",
-            "id": 2,
-            "runtime_data": [
-                {
-                    "name": "smac",
-                    "bitwidth": 48
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "ethernet",
-                                "srcAddr"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "set_dmac",
-            "id": 3,
-            "runtime_data": [
-                {
-                    "name": "dmac",
-                    "bitwidth": 48
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "ethernet",
-                                "dstAddr"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
         }
     ],
     "pipelines": [
         {
             "name": "ingress",
             "id": 0,
-            "init_table": "ipv4_lpm",
+            "init_table": "multicast_assoc",
             "tables": [
                 {
-                    "name": "ipv4_lpm",
+                    "name": "multicast_assoc",
                     "id": 0,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 16384,
+                    "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "ipv4",
+                                "dstAddr"
+                            ],
+                            "mask": null
+                        }
+                    ],
+                    "actions": [
+                        "set_mc_group",
+                        "_drop"
+                    ],
+                    "next_tables": {
+                        "set_mc_group": "ipv4_lpm",
+                        "_drop": "ipv4_lpm"
+                    },
+                    "base_default_next": "ipv4_lpm"
+                },
+                {
+                    "name": "ipv4_lpm",
+                    "id": 1,
                     "match_type": "lpm",
                     "type": "simple",
                     "max_size": 1024,
@@ -504,7 +587,7 @@
                 },
                 {
                     "name": "forward",
-                    "id": 1,
+                    "id": 2,
                     "match_type": "exact",
                     "type": "simple",
                     "max_size": 512,
@@ -541,7 +624,7 @@
             "tables": [
                 {
                     "name": "send_frame",
-                    "id": 2,
+                    "id": 3,
                     "match_type": "exact",
                     "type": "simple",
                     "max_size": 256,
@@ -707,6 +790,18 @@
         [
             "standard_metadata",
             "_padding"
+        ],
+        [
+            "intrinsic_metadata",
+            "mcast_grp"
+        ],
+        [
+            "intrinsic_metadata",
+            "egress_rid"
+        ],
+        [
+            "intrinsic_metadata",
+            "mcast_hash"
         ]
     ]
 }
