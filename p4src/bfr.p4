@@ -5,6 +5,20 @@ action _drop() {
     drop();
 }
 
+table bier_assoc {
+  reads {
+    ipv4.dstAddr : exact;
+  }
+  actions {
+    add_bier_header;
+  }
+}
+
+action add_bier_header(bitstring) {
+  add_header(bier);
+  modify_field(bier.BitString, bitstring);
+}
+
 header_type routing_metadata_t {
     fields {
         nhop_ipv4 : 32;
@@ -77,18 +91,6 @@ table send_frame {
     }
     size: 256;
 }
-
-
-table bier_packet {
-    reads {
-	ipv4.dstAddr : lpm;
-    }
-    actions {
-    	_drop;
-    }
-    size: 256;
-}
-
 
 control ingress {
     apply(multicast_assoc);
