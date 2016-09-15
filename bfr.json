@@ -362,11 +362,11 @@
     "meter_arrays": [],
     "actions": [
         {
-            "name": "rewrite_mac",
+            "name": "set_dmac",
             "id": 0,
             "runtime_data": [
                 {
-                    "name": "smac",
+                    "name": "dmac",
                     "bitwidth": 48
                 }
             ],
@@ -378,7 +378,7 @@
                             "type": "field",
                             "value": [
                                 "ethernet",
-                                "srcAddr"
+                                "dstAddr"
                             ]
                         },
                         {
@@ -418,22 +418,11 @@
             ]
         },
         {
-            "name": "_drop",
+            "name": "rewrite_mac",
             "id": 2,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "drop",
-                    "parameters": []
-                }
-            ]
-        },
-        {
-            "name": "set_dmac",
-            "id": 3,
             "runtime_data": [
                 {
-                    "name": "dmac",
+                    "name": "smac",
                     "bitwidth": 48
                 }
             ],
@@ -445,7 +434,7 @@
                             "type": "field",
                             "value": [
                                 "ethernet",
-                                "dstAddr"
+                                "srcAddr"
                             ]
                         },
                         {
@@ -453,6 +442,17 @@
                             "value": 0
                         }
                     ]
+                }
+            ]
+        },
+        {
+            "name": "_drop",
+            "id": 3,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "drop",
+                    "parameters": []
                 }
             ]
         },
