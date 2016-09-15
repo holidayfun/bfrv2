@@ -1,3 +1,11 @@
+header_type intrinsic_metadata_t {
+    fields {
+        mcast_grp : 4;
+        egress_rid : 4;
+        mcast_hash : 16;
+    }
+}
+
 header_type bier_t {
   fields {
     first_nibble : 4;

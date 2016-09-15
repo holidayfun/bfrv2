@@ -12,6 +12,24 @@ header_type routing_metadata_t {
 }
 
 metadata routing_metadata_t routing_metadata;
+/* Metadata for Multicast */
+metadata intrinsic_metadata_t intrinsic_metadata;
+
+/* Table for associating a IP to a Multicast group ID */
+table multicast_assoc {
+    reads {
+      ipv4.dstAddr : exact;
+    }
+    actions {
+      set_mc_group;
+      _drop;
+    }
+}
+
+action set_mc_group(group_id) {
+  modify_field(intrinsic_metadata.mcast_grp, group_id);
+}
+
 
 action set_nhop(nhop_ipv4, port) {
     modify_field(routing_metadata.nhop_ipv4, nhop_ipv4);
@@ -73,6 +91,7 @@ table bier_packet {
 
 
 control ingress {
+    apply(multicast_assoc);
     apply(ipv4_lpm);
     apply(forward);
 }
