@@ -181,7 +181,7 @@ class P4Router(P4Switch):
         #logging
         args.extend(['--log-file', self.logfile])
         args.append('--log-flush')
-
+        args.extend(['--log-level', 'trace'])
         print(' '.join(args) + '  2>&1 </dev/null &')
         self.cmd(' '.join(args) + '  2>&1 </dev/null &' , verbose=True)
     def stop(self):
