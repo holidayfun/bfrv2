@@ -223,12 +223,6 @@
             "id": 4,
             "header_type": "routing_metadata_t",
             "metadata": true
-        },
-        {
-            "name": "intrinsic_metadata",
-            "id": 5,
-            "header_type": "intrinsic_metadata_t",
-            "metadata": true
         }
     ],
     "header_stacks": [],
@@ -390,75 +384,8 @@
             ]
         },
         {
-            "name": "set_mc_group",
-            "id": 1,
-            "runtime_data": [
-                {
-                    "name": "group_id",
-                    "bitwidth": 4
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "intrinsic_metadata",
-                                "mcast_grp"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "rewrite_mac",
-            "id": 2,
-            "runtime_data": [
-                {
-                    "name": "smac",
-                    "bitwidth": 48
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "ethernet",
-                                "srcAddr"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "_drop",
-            "id": 3,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "drop",
-                    "parameters": []
-                }
-            ]
-        },
-        {
             "name": "set_nhop",
-            "id": 4,
+            "id": 1,
             "runtime_data": [
                 {
                     "name": "nhop_ipv4",
@@ -493,7 +420,7 @@
                             "type": "field",
                             "value": [
                                 "standard_metadata",
-                                "egress_port"
+                                "egress_spec"
                             ]
                         },
                         {
@@ -519,16 +446,92 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "rewrite_mac",
+            "id": 2,
+            "runtime_data": [
+                {
+                    "name": "smac",
+                    "bitwidth": 48
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "ethernet",
+                                "srcAddr"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "add_bier_header",
+            "id": 3,
+            "runtime_data": [
+                {
+                    "name": "bitstring",
+                    "bitwidth": 16
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "bier"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier",
+                                "BitString"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "_drop",
+            "id": 4,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "drop",
+                    "parameters": []
+                }
+            ]
         }
     ],
     "pipelines": [
         {
             "name": "ingress",
             "id": 0,
-            "init_table": "multicast_assoc",
+            "init_table": "bier_ingress",
             "tables": [
                 {
-                    "name": "multicast_assoc",
+                    "name": "bier_ingress",
                     "id": 0,
                     "match_type": "exact",
                     "type": "simple",
@@ -547,14 +550,14 @@
                         }
                     ],
                     "actions": [
-                        "set_mc_group",
+                        "add_bier_header",
                         "_drop"
                     ],
                     "next_tables": {
-                        "set_mc_group": "ipv4_lpm",
-                        "_drop": "ipv4_lpm"
+                        "__HIT__": null,
+                        "__MISS__": "ipv4_lpm"
                     },
-                    "base_default_next": "ipv4_lpm"
+                    "base_default_next": null
                 },
                 {
                     "name": "ipv4_lpm",
@@ -790,18 +793,6 @@
         [
             "standard_metadata",
             "_padding"
-        ],
-        [
-            "intrinsic_metadata",
-            "mcast_grp"
-        ],
-        [
-            "intrinsic_metadata",
-            "egress_rid"
-        ],
-        [
-            "intrinsic_metadata",
-            "mcast_hash"
         ]
     ]
 }
