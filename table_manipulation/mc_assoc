@@ -1,1 +1,1 @@
-table_add multicast_assoc set_mc_group 10.10.10.10 1
+table_add multicast_assoc set_mc_group 10.10.10.10 => 1
