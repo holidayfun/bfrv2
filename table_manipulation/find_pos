@@ -1,0 +1,8 @@
+table_add find_pos dump_pos 0b00000001/8 => 1
+table_add find_pos dump_pos 0b00000010/7 => 2
+table_add find_pos dump_pos 0b00000100/6 => 3
+table_add find_pos dump_pos 0b00001000/5 => 4
+table_add find_pos dump_pos 0b00010000/4 => 5
+table_add find_pos dump_pos 0b00100000/3 => 6
+table_add find_pos dump_pos 0b01000000/2 => 7
+table_add find_pos dump_pos 0b10000000/1 => 8
