@@ -1,5 +1,4 @@
 import json
-import collections
 num_switches = 3
 hosts_per_switch = 2
 
@@ -11,7 +10,7 @@ for i in range(1,num_switches + 1):
     s = {   'name'  : 's{0}'.format(i),
             'number': i,
             'ip': '10.0.{0}.1'.format(i),
-            'mac' : 'bb:00:00:00:{0:02d}:1'.format(i),
+            'mac' : 'aa:00:00:00:{0:02d}:1'.format(i),
             'control_network_ip' : '100.0.0.%s' % (100 + 2 * i),
             'subnet_ip' : '10.0.{0}.0'.format(i),
             'prefix_len' : 24,
@@ -24,9 +23,9 @@ for i in range(1,num_switches + 1):
         h = {   'name':'h{0}'.format(host_num),
                 'number': j,
                 'ip': '10.0.{0}.{1}'.format(i, host_num + 1),
-                'mac' : 'bb:00:00:00:{0:02d}:{1:02d}'.format(i, host_num + 1),
+                'mac' : 'aa:00:00:00:{0:02d}:{1:02d}'.format(i, host_num + 1),
                 'switch_addr': '10.0.{0}.{1}'.format(i, 100 + host_num + 1),
-                'switch_mac' : 'bb:aa:00:00:{0:02d}:{1:02d}'.format(i, host_num + 1)
+                'switch_mac' : 'aa:aa:00:00:{0:02d}:{1:02d}'.format(i, host_num + 1)
                 }
         s['hosts'].append(h)
 
@@ -37,10 +36,10 @@ switch_links = []
 for i in range(0,num_switches):
     switch_links.append({ 'node1': {'name' : network['switches'][i]['name'],
                                     'ip' : '20.0.0.{0}'.format(2 * i + 1),
-                                    'mac' : 'bb:dd:00:00:00:{0:02d}'.format(2 * i + 1)},
+                                    'mac' : 'aa:dd:00:00:00:{0:02d}'.format(2 * i + 1)},
                           'node2': {'name' : network['switches'][(i+1) % num_switches]['name'],
                                      'ip' : '20.0.0.{0}'.format(2 * i + 2),
-                                     'mac' : 'bb:dd:00:00:00:{0:02d}'.format(2 * i + 2)}})
+                                     'mac' : 'aa:dd:00:00:00:{0:02d}'.format(2 * i + 2)}})
 
 #print(switch_links)
 
