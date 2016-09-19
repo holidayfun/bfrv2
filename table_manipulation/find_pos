@@ -1,8 +1,17 @@
-table_add find_pos dump_pos 0b00000001/8 => 1
-table_add find_pos dump_pos 0b00000010/7 => 2
-table_add find_pos dump_pos 0b00000100/6 => 3
-table_add find_pos dump_pos 0b00001000/5 => 4
-table_add find_pos dump_pos 0b00010000/4 => 5
-table_add find_pos dump_pos 0b00100000/3 => 6
-table_add find_pos dump_pos 0b01000000/2 => 7
-table_add find_pos dump_pos 0b10000000/1 => 8
+table_set_default find_pos _drop
+table_add find_pos save_pos 0b0000000000000001/16 => 1
+table_add find_pos save_pos 0b0000000000000010/15 => 2
+table_add find_pos save_pos 0b0000000000000100/14 => 3
+table_add find_pos save_pos 0b0000000000001000/13 => 4
+table_add find_pos save_pos 0b0000000000010000/12 => 5
+table_add find_pos save_pos 0b0000000000100000/11 => 6
+table_add find_pos save_pos 0b0000000001000000/10 => 7
+table_add find_pos save_pos 0b0000000010000000/9 => 8
+table_add find_pos save_pos 0b0000000100000000/8 => 9
+table_add find_pos save_pos 0b0000001000000000/7 => 10
+table_add find_pos save_pos 0b0000010000000000/6 => 11
+table_add find_pos save_pos 0b0000100000000000/5 => 12
+table_add find_pos save_pos 0b0001000000000000/4 => 13
+table_add find_pos save_pos 0b0010000000000000/3 => 14
+table_add find_pos save_pos 0b0100000000000000/2 => 15
+table_add find_pos save_pos 0b1000000000000000/1 => 16
