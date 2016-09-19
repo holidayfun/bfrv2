@@ -19,7 +19,7 @@ header_type bier_metadata_t {
 
 control ingress {
     if(ethernet.etherType == 0xBBBB) {
-        /* received a BIER packet */ 
+        /* received a BIER packet */
         /* Falls BS nur aus 0en besteht, verwerfen */
         if(bier.BitString == 0) {
             /* markiere Paket zum drop */
@@ -30,7 +30,7 @@ control ingress {
         /* -> workaround mit find_pos möglich */
         /* soll die Position in Metadaten festhalten, falls kein Hit vorliegt, besteht BitString nur aus 0en => drop action  */
         apply(find_pos);
-        
+
         /* Falls k der eigenen BFR-id entspricht, weiter geben an multicast overlay*/
         /* prüfen evtl mit einer Tabelle mit nur dem Eintrag der eigenen BFR-id, falls ein match auftritt, ist k identisch der BFR-id */
         apply(check_bfr_id){
@@ -41,9 +41,9 @@ control ingress {
 
         /* Nutze die BFR-id k als lookup key für die Bit Index Forwarding Table, erhalte als Rückgabe die F-BM und den Nachbarn NBR (evtl als Port?) */
         apply(bift);
-        
-        /* Bearbeitung des Packets geschieht in der Action zu bift */ 
-    
+
+        /* Bearbeitung des Packets geschieht in der Action zu bift */
+
     } else if(ethernet.etherType == 0x0800) {
         /* received a IPv4 packet. Check if it should be encapsulated in a BIER packet */
         apply(bier_ingress) {
@@ -77,7 +77,7 @@ action bift_action(f_bm, nbr_port) {
 
         /* Berechne p1.BitString AND NOT F-BM, also cleare alle 1en im BS, die in der Maske gesetzt waren.
     Verschiebe dieses Paket zurück in die Ingress Pipeline und beginne von vorn */
-    
+
     modify_field(bier_metadata.bs_dest, bier.BitString & f_bm);
     modify_field(bier_metadata.bs_remaining, bier.BitString & ~ f_bm);
     modify_field(standard_metadata.egress_spec, nbr_port);
@@ -117,17 +117,21 @@ action add_bier_header(bitstring) {
     modify_field(bier.BitString, bitstring);
     /* recirculate the paket to the ingress */
     /*recirculate(bier_field_list);*/
-    
-    
+
+
     /* some hard coded stuff */
-    modify_field(standard_metadata.egress_spec, 3);
-    modify_field(ethernet.dstAddr, 0xaaaa00000002);
+    /*modify_field(standard_metadata.egress_spec, 3);*/
+    /*modify_field(ethernet.dstAddr, 0xaaaa00000002);*/
     modify_field(ethernet.etherType, 0xBBBB);
+
+    recirculate(bier_field_list);
 }
 
 /* recirculation takes a field list as parameter */
 field_list bier_field_list {
     bier;
+    ipv4;
+    ethernet;
 }
 
 
