@@ -3,6 +3,8 @@ header_type intrinsic_metadata_t {
         mcast_grp : 4;
         egress_rid : 4;
         mcast_hash : 16;
+        recirculate_flag : 1;
+        resubmit_flag : 1;
     }
 }
 

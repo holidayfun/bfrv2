@@ -11,11 +11,11 @@ metadata bier_metadata_t bier_metadata;
 header_type bier_metadata_t {
     fields {
         k_pos : 4;
-        drop : 1;
-        bs_dest : 16;
         bs_remaining: 16;
+        f_bm : 16;
     }
 }
+metadata intrinsic_metadata_t intrinsic_metadata;
 
 control ingress {
     if(ethernet.etherType == 0xBBBB) {
@@ -29,21 +29,21 @@ control ingress {
         /* Finde Position k der ersten 1 im BS */
         /* -> workaround mit find_pos möglich */
         /* soll die Position in Metadaten festhalten, falls kein Hit vorliegt, besteht BitString nur aus 0en => drop action  */
-        apply(find_pos);
-
-        /* Falls k der eigenen BFR-id entspricht, weiter geben an multicast overlay*/
-        /* prüfen evtl mit einer Tabelle mit nur dem Eintrag der eigenen BFR-id, falls ein match auftritt, ist k identisch der BFR-id */
-        apply(check_bfr_id){
+        apply(find_pos) {
             hit {
-                /* Übergabe an multicast overlay, cleare Bit k und beginne von vorne */
+                /* Falls k der eigenen BFR-id entspricht, weiter geben an multicast overlay*/
+        /* prüfen evtl mit einer Tabelle mit nur dem Eintrag der eigenen BFR-id, falls ein match auftritt, ist k identisch der BFR-id */
+                apply(check_bfr_id){
+                    hit {
+                         /* Übergabe an multicast overlay, cleare Bit k und beginne von vorne */
+                    }
+                }
+        /* Nutze die BFR-id k als lookup key für die Bit Index Forwarding Table, erhalte als Rückgabe die F-BM und den Nachbarn NBR (evtl als Port?) */
+                apply(bift);
             }
         }
-
-        /* Nutze die BFR-id k als lookup key für die Bit Index Forwarding Table, erhalte als Rückgabe die F-BM und den Nachbarn NBR (evtl als Port?) */
-        apply(bift);
-
         /* Bearbeitung des Packets geschieht in der Action zu bift */
-
+        
     } else if(ethernet.etherType == 0x0800) {
         /* received a IPv4 packet. Check if it should be encapsulated in a BIER packet */
         apply(bier_ingress) {
@@ -60,9 +60,7 @@ control ingress {
 }
 
 control egress {
-    if (1 == 1) {
-
-    } else {
+    if (ethernet.etherType == 0x0800) {
         apply(send_frame);
     }
 }
@@ -72,15 +70,16 @@ action _drop() {
 }
 
 action bift_action(f_bm, nbr_port) {
-         /* Packet klonen in p1 und p2 */
-        /* Berechne p1.BitString AND F-BM um die Empfänger über NBR zu bestimmen, setze den BitString entpsrechend und schicke Paket an NBR */
-
-        /* Berechne p1.BitString AND NOT F-BM, also cleare alle 1en im BS, die in der Maske gesetzt waren.
-    Verschiebe dieses Paket zurück in die Ingress Pipeline und beginne von vorn */
-
-    modify_field(bier_metadata.bs_dest, bier.BitString & f_bm);
     modify_field(bier_metadata.bs_remaining, bier.BitString & ~ f_bm);
+       
     modify_field(standard_metadata.egress_spec, nbr_port);
+   
+    /*clone_egress_pkt_to_egress(nbr_port, bier_cloning_FL);*/
+    
+    modify_field(bier_metadata.f_bm, (bier.BitString & ~ bier.BitString) | f_bm); 
+    modify_field(bier.BitString, bier.BitString & f_bm);
+
+    /*recirculate(bier_FL);*/
 }
 
 table bift {
@@ -92,13 +91,20 @@ table bift {
     }
 }
 
+
+action packet_for_bfr(bm) {
+    modify_field(bier.BitString, bier.BitString & ~ bm);
+    /* clear bit k and recirculate */
+    /*recirculate(bier_FL);*/
+}
+
 table check_bfr_id {
     reads {
         bier_metadata.k_pos : exact;
     }
     actions {
         /* Weiterleitung an multicast overlay */
-        _drop;
+        packet_for_bfr;
     }
 }
 
@@ -115,22 +121,16 @@ table bier_ingress {
 action add_bier_header(bitstring) {
     add_header(bier);
     modify_field(bier.BitString, bitstring);
-    /* recirculate the paket to the ingress */
-    /*recirculate(bier_field_list);*/
-
-
-    /* some hard coded stuff */
-    /*modify_field(standard_metadata.egress_spec, 3);*/
-    /*modify_field(ethernet.dstAddr, 0xaaaa00000002);*/
+        
+    /* set ether type to BBBB, for bier packet */
     modify_field(ethernet.etherType, 0xBBBB);
-
-    recirculate(bier_field_list);
+    /* recirculate the paket to begin standard bier processing */
+    recirculate(bier_FL);
 }
 
 /* recirculation takes a field list as parameter */
-field_list bier_field_list {
+field_list bier_FL {
     bier;
-    ipv4;
     ethernet;
 }
 
@@ -223,11 +223,11 @@ action save_pos(pos) {
 table find_pos {
     reads {
         /* normally read bit string*/
-        ipv4.ttl : lpm;
+        bier.BitString : lpm;
     }
     actions {
         save_pos;
-
+        _drop;
         /* default action sollte drop sein, dann wird ein BS der nur aus 0en besteht direkt verworfen */
     }
 }
