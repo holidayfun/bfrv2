@@ -62,7 +62,7 @@ def handle_cmd(cmd, switch_name, thrift_server, thrift_port=22222):
 def add_all_entries(bift_entry, switch_name, thrift_server, thrift_port=22222):
     add_bift_entry(bift_entry, switch_name, thrift_server, thrift_port)
 def add_bift_entry(entry, switch_name, thrift_server, thrift_port=22222):
-    handle_cmd("table_add bift bift_action {entry[bfr_id]} => {entry[bitstring]} {entry[nbr_port]}".format(entry=entry), switch_name, thrift_server, thrift_port)
+    handle_cmd("table_add bift bift_action {entry[bfr_id]} => 0b{entry[bitstring]} {entry[nbr_port]}".format(entry=entry), switch_name, thrift_server, thrift_port)
 
 def jprint(data):
     print(json.dumps(data, sort_keys=True, indent=4, separators=(',', ': ')))
