@@ -115,6 +115,8 @@ action _drop() {
 
 action bift_action(f_bm, nbr_port) {
     modify_field(bier_metadata.bs_remaining, bier.BitString & ~ f_bm);       
+    
+    /* just mark it, cloning will happen in egress */
     modify_field(bier_metadata.needs_cloning, 1);
     /*clone_egress_pkt_to_egress(2, bier_FL);*/
     
@@ -136,7 +138,7 @@ table bift {
 action packet_for_bfr(bm) {
     modify_field(bier.BitString, bier.BitString & ~ bm);
     /* clear bit k and recirculate */
-    /*recirculate(bier_FL);*/
+    recirculate(bier_FL);
 }
 
 table check_bfr_id {
@@ -175,7 +177,7 @@ field_list bier_FL {
     /*ipv4;*/
     ethernet;
     bier_metadata;
-    /*standard_metadata;*/
+    standard_metadata;
 }
 
 /* workaround to find pos k of first 1 in bitstring */

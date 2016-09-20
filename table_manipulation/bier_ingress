@@ -1,1 +1,1 @@
-table_add bier_ingress add_bier_header 10.10.10.10 => 0b0000000000000110
+table_add bier_ingress add_bier_header 10.10.10.10 => 0b0000000000000111
