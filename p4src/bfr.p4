@@ -24,10 +24,8 @@ control ingress {
     if(ethernet.etherType == 0xBBBB) {
         /* received a BIER packet */
         /* Falls BS nur aus 0en besteht, verwerfen */
-        if(bier.BitString == 0) {
-            /* markiere Paket zum drop */
-            /* (wird bei find_pos mitbehandelt */
-        }
+        /* markiere Paket zum drop */
+        /* (wird bei find_pos mitbehandelt */
 
         /* Finde Position k der ersten 1 im BS */
         /* -> workaround mit find_pos möglich */
@@ -62,15 +60,50 @@ control ingress {
     }
 }
 
-control egress {
-    /*if (cloning_metadata.i2i == 1) {
-        clone_egress_to_egress(1, bier_FL);
-    }*/
-    
-    /* type 2 -> egress clone */
-    if (standard_metadata.instance_type == 2) {
-        
+action do_cloning() {
+    modify_field(bier_metadata.needs_cloning, 0);
+    clone_egress_pkt_to_egress(1, bier_FL);
+    /*recirculate(bier_FL);*/
+}
+
+table do_cloning_table {
+    reads {
+        standard_metadata.instance_type: exact;
     }
+    actions {
+        do_cloning;
+    }
+}
+
+action do_clone_recirculation() { 
+    modify_field(bier.BitString, bier_metadata.bs_remaining);
+    recirculate(bier_FL);
+}
+
+table do_clone_recirculation_table {
+    reads {
+        standard_metadata.instance_type : exact;
+    }
+    actions {
+        do_clone_recirculation;
+    }
+}
+
+control egress {
+   if(standard_metadata.instance_type == 2) {
+       apply(do_clone_recirculation_table);
+   }
+   
+   if(bier_metadata.needs_cloning == 1) {
+       apply(do_cloning_table);
+   } 
+
+/*
+PKT_INSTANCE_TYPE_EGRESS_CLONE - 2
+PKT_INSTANCE_TYPE_RECIRC - 4
+PKT_INSTANCE_TYPE_RESUBMIT - 6
+*/ 
+    /* type 2 -> egress clone */
     if (ethernet.etherType == 0x0800) {
         apply(send_frame);
     }
@@ -139,9 +172,10 @@ action add_bier_header(bitstring) {
 /* recirculation takes a field list as parameter */
 field_list bier_FL {
     bier;
+    /*ipv4;*/
     ethernet;
     bier_metadata;
-    standard_metadata;
+    /*standard_metadata;*/
 }
 
 /* workaround to find pos k of first 1 in bitstring */
