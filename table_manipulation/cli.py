@@ -21,8 +21,9 @@ if __name__ == "__main__":
 
     port = args.port
     print('Connectiong to {0}:{1}'.format(ip, port))
-    print(call(['/home/hartmann/behavioral-model/tools/runtime_CLI.py',
-                '--pre', 'SimplePreLAG',
+
+    print(call(['/home/hartmann/behavioral-model/targets/bfrv2/cli/sswitch_CLI.py',
+                #'--pre', 'SimplePreLAG',
                 '--thrift-port', str(port),
                 '--thrift-ip', ip],
                 stdin=sys.stdin))
