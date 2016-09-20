@@ -15,6 +15,7 @@ header_type bier_metadata_t {
         k_pos : 4;
         bs_remaining: 16;
         needs_cloning : 1;
+        decap : 1;
     }
 }
 
@@ -38,9 +39,11 @@ control ingress {
                     hit {
                          /* Übergabe an multicast overlay, cleare Bit k und beginne von vorne */
                     }
+                    miss {
+                        /* Nutze die BFR-id k als lookup key für die Bit Index Forwarding Table, erhalte als Rückgabe die F-BM und den Nachbarn NBR (evtl als Port?) */
+                        apply(bift);
+                    }
                 }
-        /* Nutze die BFR-id k als lookup key für die Bit Index Forwarding Table, erhalte als Rückgabe die F-BM und den Nachbarn NBR (evtl als Port?) */
-                apply(bift);
             }
         }
         /* Bearbeitung des Packets geschieht in der Action zu bift */
@@ -53,15 +56,11 @@ control ingress {
                 apply(ipv4_lpm);
                 apply(forward);
             }
-            hit {
-                /* BIER header was added, just recirculate it to the ingress to begin normal BIER processing */
-            }
         }
     }
 }
 
 action do_cloning() {
-    modify_field(bier_metadata.needs_cloning, 0);
     clone_egress_pkt_to_egress(1, bier_FL);
     /*recirculate(bier_FL);*/
 }
@@ -75,7 +74,8 @@ table do_cloning_table {
     }
 }
 
-action do_clone_recirculation() { 
+action do_clone_recirculation() {    
+    modify_field(bier_metadata.needs_cloning, 0);
     modify_field(bier.BitString, bier_metadata.bs_remaining);
     recirculate(bier_FL);
 }
@@ -90,13 +90,13 @@ table do_clone_recirculation_table {
 }
 
 control egress {
-   if(standard_metadata.instance_type == 2) {
-       apply(do_clone_recirculation_table);
-   }
-   
-   if(bier_metadata.needs_cloning == 1) {
+    if(standard_metadata.instance_type == 2) {
+        if(bier_metadata.needs_cloning == 1) {
+            apply(do_clone_recirculation_table);
+        }
+    } else if(bier_metadata.needs_cloning == 1 or bier_metadata.decap == 1) {
        apply(do_cloning_table);
-   } 
+    } 
 
 /*
 PKT_INSTANCE_TYPE_EGRESS_CLONE - 2
@@ -136,9 +136,22 @@ table bift {
 }
 
 action packet_for_bfr(bm) {
-    modify_field(bier.BitString, bier.BitString & ~ bm);
+    modify_field(bier_metadata.bs_remaining, bier.BitString & ~ bm);
     /* clear bit k and recirculate */
-    recirculate(bier_FL);
+    
+    /* constraint: only send it to port 1 */
+    /*modify_field(standard_metadata.egress_spec, 1);
+    modify_field(bier_metadata.decap, 1);
+    remove_header(bier);
+    modify_field(ethernet.etherType, 0x0800);
+    modify_field(bier_metadata.needs_cloning, 0);*/
+    
+    /* here we need to mark the packet before we remove the header */
+
+    /* otherwise, the dst ip would trigger the encapsulation again */
+
+    
+    modify_field(bier_metadata.needs_cloning, 1);
 }
 
 table check_bfr_id {
@@ -177,7 +190,7 @@ field_list bier_FL {
     /*ipv4;*/
     ethernet;
     bier_metadata;
-    standard_metadata;
+    /*standard_metadata;*/
 }
 
 /* workaround to find pos k of first 1 in bitstring */
