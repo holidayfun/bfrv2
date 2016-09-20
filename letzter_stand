@@ -1,0 +1,10 @@
+BIER an sich funktioniert.
+Falls der Router selbst ein egress ist muss man das Paket weiter behandeln
+
+-Wir schicken es einfach aus Port 1 raus
+
+Aber wenn man einfach den Header entfernt, dann wird die BIER encapsulation wieder getriggert beim recircle
+
+Also muss man irgendwie kennzeichnen, dass gerade ein decap stattgefunden hat und man dann eben nicht die encapsulation triggert, sondern einfach das Paket raus haut
+
+
