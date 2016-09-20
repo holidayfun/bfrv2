@@ -1,5 +1,6 @@
 #include "includes/headers.p4"
 #include "includes/parser.p4"
+#include "includes/ip_forwarding.p4"
 
 metadata routing_metadata_t routing_metadata;
 header_type routing_metadata_t {
@@ -7,14 +8,16 @@ header_type routing_metadata_t {
         nhop_ipv4 : 32;
     }
 }
+
 metadata bier_metadata_t bier_metadata;
 header_type bier_metadata_t {
     fields {
         k_pos : 4;
         bs_remaining: 16;
-        f_bm : 16;
+        needs_cloning : 1;
     }
 }
+
 metadata intrinsic_metadata_t intrinsic_metadata;
 
 control ingress {
@@ -60,6 +63,14 @@ control ingress {
 }
 
 control egress {
+    /*if (cloning_metadata.i2i == 1) {
+        clone_egress_to_egress(1, bier_FL);
+    }*/
+    
+    /* type 2 -> egress clone */
+    if (standard_metadata.instance_type == 2) {
+        
+    }
     if (ethernet.etherType == 0x0800) {
         apply(send_frame);
     }
@@ -70,13 +81,11 @@ action _drop() {
 }
 
 action bift_action(f_bm, nbr_port) {
-    modify_field(bier_metadata.bs_remaining, bier.BitString & ~ f_bm);
-       
-    modify_field(standard_metadata.egress_spec, nbr_port);
-   
-    /*clone_egress_pkt_to_egress(nbr_port, bier_cloning_FL);*/
+    modify_field(bier_metadata.bs_remaining, bier.BitString & ~ f_bm);       
+    modify_field(bier_metadata.needs_cloning, 1);
+    /*clone_egress_pkt_to_egress(2, bier_FL);*/
     
-    modify_field(bier_metadata.f_bm, (bier.BitString & ~ bier.BitString) | f_bm); 
+    modify_field(standard_metadata.egress_spec, nbr_port);
     modify_field(bier.BitString, bier.BitString & f_bm);
 
     /*recirculate(bier_FL);*/
@@ -90,7 +99,6 @@ table bift {
         bift_action;
     }
 }
-
 
 action packet_for_bfr(bm) {
     modify_field(bier.BitString, bier.BitString & ~ bm);
@@ -132,88 +140,9 @@ action add_bier_header(bitstring) {
 field_list bier_FL {
     bier;
     ethernet;
+    bier_metadata;
+    standard_metadata;
 }
-
-
-/* standard ip routing begin */
-action set_nhop(nhop_ipv4, port) {
-    modify_field(routing_metadata.nhop_ipv4, nhop_ipv4);
-    modify_field(standard_metadata.egress_spec, port);
-    add_to_field(ipv4.ttl, -1);
-}
-table ipv4_lpm {
-    reads {
-        ipv4.dstAddr : lpm;
-    }
-    actions {
-        set_nhop;
-        _drop;
-    }
-    size: 1024;
-}
-
-action set_dmac(dmac) {
-    modify_field(ethernet.dstAddr, dmac);
-}
-table forward {
-    reads {
-        routing_metadata.nhop_ipv4 : exact;
-    }
-    actions {
-        set_dmac;
-        _drop;
-    }
-    size: 512;
-}
-
-action rewrite_mac(smac) {
-    modify_field(ethernet.srcAddr, smac);
-}
-table send_frame {
-    reads {
-        standard_metadata.egress_port: exact;
-    }
-    actions {
-        rewrite_mac;
-        _drop;
-    }
-    size: 256;
-}
-/* standard ip routing end */
-
-
-/* normal multicast begin */
-/*
-metadata intrinsic_metadata_t intrinsic_metadata;
-table multicast_assoc {
-    reads {
-        ipv4.dstAddr : exact;
-    }
-    actions {
-        set_mc_group;
-        _drop;
-    }
-}
-action set_mc_group(group_id) {
-    modify_field(intrinsic_metadata.mcast_grp, group_id);
-}
-table send_mc {
-    reads {
-        intrinsic_metadata.mcast_grp : exact;
-        standard_metadata.egress_port: exact;
-        ipv4.dstAddr : exact;
-    }
-    actions{
-        set_receiver;
-        _drop;
-    }
-    size:256;
-}
-action set_receiver(ip, dmac) {
-    modify_field(ipv4.dstAddr, ip);
-    modify_field(ethernet.dstAddr, dmac);
-} */
-/* normal multicast end */
 
 /* workaround to find pos k of first 1 in bitstring */
 action save_pos(pos) {
