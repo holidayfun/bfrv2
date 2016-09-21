@@ -65,7 +65,7 @@
                     1
                 ],
                 [
-                    "_padding",
+                    "pad",
                     6
                 ]
             ],
@@ -73,8 +73,44 @@
             "max_length": null
         },
         {
-            "name": "bier_t",
+            "name": "routing_metadata_t",
             "id": 2,
+            "fields": [
+                [
+                    "nhop_ipv4",
+                    32
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "bier_metadata_t",
+            "id": 3,
+            "fields": [
+                [
+                    "k_pos",
+                    6
+                ],
+                [
+                    "bs_remaining",
+                    16
+                ],
+                [
+                    "needs_cloning",
+                    1
+                ],
+                [
+                    "decap",
+                    1
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "bier_t",
+            "id": 4,
             "fields": [
                 [
                     "first_nibble",
@@ -118,7 +154,7 @@
         },
         {
             "name": "ethernet_t",
-            "id": 3,
+            "id": 5,
             "fields": [
                 [
                     "dstAddr",
@@ -138,7 +174,7 @@
         },
         {
             "name": "ipv4_t",
-            "id": 4,
+            "id": 6,
             "fields": [
                 [
                     "version",
@@ -187,46 +223,6 @@
                 [
                     "dstAddr",
                     32
-                ]
-            ],
-            "length_exp": null,
-            "max_length": null
-        },
-        {
-            "name": "routing_metadata_t",
-            "id": 5,
-            "fields": [
-                [
-                    "nhop_ipv4",
-                    32
-                ]
-            ],
-            "length_exp": null,
-            "max_length": null
-        },
-        {
-            "name": "bier_metadata_t",
-            "id": 6,
-            "fields": [
-                [
-                    "k_pos",
-                    4
-                ],
-                [
-                    "bs_remaining",
-                    16
-                ],
-                [
-                    "needs_cloning",
-                    1
-                ],
-                [
-                    "decap",
-                    1
-                ],
-                [
-                    "_padding",
-                    2
                 ]
             ],
             "length_exp": null,
@@ -351,6 +347,15 @@
                             "parameters": [
                                 {
                                     "type": "regular",
+                                    "value": "ipv4"
+                                }
+                            ]
+                        },
+                        {
+                            "op": "extract",
+                            "parameters": [
+                                {
+                                    "type": "regular",
                                     "value": "bier"
                                 }
                             ]
@@ -400,20 +405,20 @@
             "id": 0,
             "order": [
                 "ethernet",
-                "bier",
-                "ipv4"
+                "ipv4",
+                "bier"
             ]
         }
     ],
     "meter_arrays": [],
     "actions": [
         {
-            "name": "save_pos",
+            "name": "set_dmac",
             "id": 0,
             "runtime_data": [
                 {
-                    "name": "pos",
-                    "bitwidth": 4
+                    "name": "dmac",
+                    "bitwidth": 48
                 }
             ],
             "primitives": [
@@ -423,8 +428,8 @@
                         {
                             "type": "field",
                             "value": [
-                                "bier_metadata",
-                                "k_pos"
+                                "ethernet",
+                                "dstAddr"
                             ]
                         },
                         {
@@ -436,20 +441,32 @@
             ]
         },
         {
-            "name": "do_cloning",
+            "name": "do_decap",
             "id": 1,
             "runtime_data": [],
             "primitives": [
                 {
-                    "op": "clone_egress_pkt_to_egress",
+                    "op": "modify_field",
                     "parameters": [
                         {
-                            "type": "hexstr",
-                            "value": "0x1"
+                            "type": "field",
+                            "value": [
+                                "ethernet",
+                                "etherType"
+                            ]
                         },
                         {
                             "type": "hexstr",
-                            "value": "0x1"
+                            "value": "0x800"
+                        }
+                    ]
+                },
+                {
+                    "op": "remove_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "bier"
                         }
                     ]
                 }
@@ -510,8 +527,40 @@
                         {
                             "type": "field",
                             "value": [
+                                "standard_metadata",
+                                "egress_spec"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
                                 "bier_metadata",
                                 "needs_cloning"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "decap"
                             ]
                         },
                         {
@@ -523,8 +572,146 @@
             ]
         },
         {
-            "name": "add_bier_header",
+            "name": "do_cloning",
             "id": 3,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "clone_egress_pkt_to_egress",
+                    "parameters": [
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "save_pos",
+            "id": 4,
+            "runtime_data": [
+                {
+                    "name": "pos",
+                    "bitwidth": 6
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "k_pos"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "rewrite_mac",
+            "id": 5,
+            "runtime_data": [
+                {
+                    "name": "smac",
+                    "bitwidth": 48
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "ethernet",
+                                "srcAddr"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "do_clone_recirculation",
+            "id": 6,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "needs_cloning"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier",
+                                "BitString"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "bs_remaining"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "recirculate",
+                    "parameters": [
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "_drop",
+            "id": 7,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "drop",
+                    "parameters": []
+                }
+            ]
+        },
+        {
+            "name": "add_bier_header",
+            "id": 8,
             "runtime_data": [
                 {
                     "name": "bitstring",
@@ -585,64 +772,8 @@
             ]
         },
         {
-            "name": "rewrite_mac",
-            "id": 4,
-            "runtime_data": [
-                {
-                    "name": "smac",
-                    "bitwidth": 48
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "ethernet",
-                                "srcAddr"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "set_dmac",
-            "id": 5,
-            "runtime_data": [
-                {
-                    "name": "dmac",
-                    "bitwidth": 48
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "ethernet",
-                                "dstAddr"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "set_nhop",
-            "id": 6,
+            "id": 9,
             "runtime_data": [
                 {
                     "name": "nhop_ipv4",
@@ -705,70 +836,8 @@
             ]
         },
         {
-            "name": "_drop",
-            "id": 7,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "drop",
-                    "parameters": []
-                }
-            ]
-        },
-        {
-            "name": "do_clone_recirculation",
-            "id": 8,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "needs_cloning"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier",
-                                "BitString"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "bs_remaining"
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "op": "recirculate",
-                    "parameters": [
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "bift_action",
-            "id": 9,
+            "id": 10,
             "runtime_data": [
                 {
                     "name": "f_bm",
@@ -880,6 +949,73 @@
                                     }
                                 }
                             }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "do_restore_bier",
+            "id": 11,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "bier"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier",
+                                "BitString"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "bs_remaining"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "decap"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "ethernet",
+                                "etherType"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0xbbbb"
                         }
                     ]
                 }
@@ -1029,10 +1165,10 @@
                         "_drop"
                     ],
                     "next_tables": {
-                        "__HIT__": null,
-                        "__MISS__": "ipv4_lpm"
+                        "add_bier_header": "_condition_3",
+                        "_drop": "_condition_3"
                     },
-                    "base_default_next": null
+                    "base_default_next": "_condition_3"
                 },
                 {
                     "name": "find_pos",
@@ -1108,7 +1244,54 @@
                             }
                         }
                     },
+                    "true_next": "_condition_2",
+                    "false_next": null
+                },
+                {
+                    "name": "_condition_2",
+                    "id": 2,
+                    "expression": {
+                        "type": "expression",
+                        "value": {
+                            "op": "==",
+                            "left": {
+                                "type": "field",
+                                "value": [
+                                    "bier_metadata",
+                                    "decap"
+                                ]
+                            },
+                            "right": {
+                                "type": "hexstr",
+                                "value": "0x0"
+                            }
+                        }
+                    },
                     "true_next": "bier_ingress",
+                    "false_next": "_condition_3"
+                },
+                {
+                    "name": "_condition_3",
+                    "id": 3,
+                    "expression": {
+                        "type": "expression",
+                        "value": {
+                            "op": "not",
+                            "left": null,
+                            "right": {
+                                "type": "expression",
+                                "value": {
+                                    "op": "valid",
+                                    "left": null,
+                                    "right": {
+                                        "type": "header",
+                                        "value": "bier"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "true_next": "ipv4_lpm",
                     "false_next": null
                 }
             ]
@@ -1116,7 +1299,7 @@
         {
             "name": "egress",
             "id": 1,
-            "init_table": "_condition_2",
+            "init_table": "_condition_4",
             "tables": [
                 {
                     "name": "send_frame",
@@ -1142,10 +1325,10 @@
                         "_drop"
                     ],
                     "next_tables": {
-                        "rewrite_mac": null,
-                        "_drop": null
+                        "rewrite_mac": "_condition_9",
+                        "_drop": "_condition_9"
                     },
-                    "base_default_next": null
+                    "base_default_next": "_condition_9"
                 },
                 {
                     "name": "do_cloning_table",
@@ -1170,9 +1353,9 @@
                         "do_cloning"
                     ],
                     "next_tables": {
-                        "do_cloning": "_condition_5"
+                        "do_cloning": "_condition_8"
                     },
-                    "base_default_next": "_condition_5"
+                    "base_default_next": "_condition_8"
                 },
                 {
                     "name": "do_clone_recirculation_table",
@@ -1197,15 +1380,51 @@
                         "do_clone_recirculation"
                     ],
                     "next_tables": {
-                        "do_clone_recirculation": "_condition_5"
+                        "do_clone_recirculation": "_condition_8"
                     },
-                    "base_default_next": "_condition_5"
+                    "base_default_next": "_condition_8"
+                },
+                {
+                    "name": "do_restore_bier_table",
+                    "id": 9,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 16384,
+                    "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
+                    "key": [],
+                    "actions": [
+                        "do_restore_bier"
+                    ],
+                    "next_tables": {
+                        "do_restore_bier": "_condition_6"
+                    },
+                    "base_default_next": "_condition_6"
+                },
+                {
+                    "name": "do_decap_table",
+                    "id": 10,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 16384,
+                    "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
+                    "key": [],
+                    "actions": [
+                        "do_decap"
+                    ],
+                    "next_tables": {
+                        "do_decap": null
+                    },
+                    "base_default_next": null
                 }
             ],
             "conditionals": [
                 {
-                    "name": "_condition_2",
-                    "id": 2,
+                    "name": "_condition_4",
+                    "id": 4,
                     "expression": {
                         "type": "expression",
                         "value": {
@@ -1223,12 +1442,35 @@
                             }
                         }
                     },
-                    "true_next": "_condition_3",
-                    "false_next": "_condition_4"
+                    "true_next": "_condition_5",
+                    "false_next": "_condition_7"
                 },
                 {
-                    "name": "_condition_3",
-                    "id": 3,
+                    "name": "_condition_5",
+                    "id": 5,
+                    "expression": {
+                        "type": "expression",
+                        "value": {
+                            "op": "==",
+                            "left": {
+                                "type": "field",
+                                "value": [
+                                    "bier_metadata",
+                                    "decap"
+                                ]
+                            },
+                            "right": {
+                                "type": "hexstr",
+                                "value": "0x1"
+                            }
+                        }
+                    },
+                    "true_next": "do_restore_bier_table",
+                    "false_next": "_condition_6"
+                },
+                {
+                    "name": "_condition_6",
+                    "id": 6,
                     "expression": {
                         "type": "expression",
                         "value": {
@@ -1247,11 +1489,11 @@
                         }
                     },
                     "true_next": "do_clone_recirculation_table",
-                    "false_next": "_condition_5"
+                    "false_next": "_condition_8"
                 },
                 {
-                    "name": "_condition_4",
-                    "id": 4,
+                    "name": "_condition_7",
+                    "id": 7,
                     "expression": {
                         "type": "expression",
                         "value": {
@@ -1293,11 +1535,11 @@
                         }
                     },
                     "true_next": "do_cloning_table",
-                    "false_next": "_condition_5"
+                    "false_next": "_condition_8"
                 },
                 {
-                    "name": "_condition_5",
-                    "id": 5,
+                    "name": "_condition_8",
+                    "id": 8,
                     "expression": {
                         "type": "expression",
                         "value": {
@@ -1316,6 +1558,29 @@
                         }
                     },
                     "true_next": "send_frame",
+                    "false_next": "_condition_9"
+                },
+                {
+                    "name": "_condition_9",
+                    "id": 9,
+                    "expression": {
+                        "type": "expression",
+                        "value": {
+                            "op": "==",
+                            "left": {
+                                "type": "field",
+                                "value": [
+                                    "bier_metadata",
+                                    "decap"
+                                ]
+                            },
+                            "right": {
+                                "type": "hexstr",
+                                "value": "0x1"
+                            }
+                        }
+                    },
+                    "true_next": "do_decap_table",
                     "false_next": null
                 }
             ]
@@ -1429,90 +1694,6 @@
                 {
                     "type": "field",
                     "value": [
-                        "bier",
-                        "first_nibble"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "bier",
-                        "Ver"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "bier",
-                        "Len"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "bier",
-                        "Entropy"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "bier",
-                        "BitString"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "bier",
-                        "OAM"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "bier",
-                        "Reserved"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "bier",
-                        "Proto"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "bier",
-                        "BFIR_id"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "ethernet",
-                        "dstAddr"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "ethernet",
-                        "srcAddr"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "ethernet",
-                        "etherType"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
                         "bier_metadata",
                         "k_pos"
                     ]
@@ -1541,7 +1722,56 @@
                 {
                     "type": "field",
                     "value": [
-                        "bier_metadata",
+                        "standard_metadata",
+                        "ingress_port"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "packet_length"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "egress_spec"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "egress_port"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "egress_instance"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "instance_type"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
+                        "clone_spec"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "standard_metadata",
                         "_padding"
                     ]
                 }
@@ -1605,7 +1835,7 @@
         ],
         [
             "intrinsic_metadata",
-            "_padding"
+            "pad"
         ]
     ]
 }

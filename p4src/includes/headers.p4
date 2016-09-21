@@ -9,6 +9,23 @@ header_type intrinsic_metadata_t {
     }
 }
 
+header_type routing_metadata_t {
+    fields 
+    {
+        nhop_ipv4 : 32;
+    }
+}            
+
+header_type bier_metadata_t {
+    fields 
+    {         
+        k_pos : 6;
+        bs_remaining: 16;
+        needs_cloning : 1;
+        decap : 1;
+    }
+}
+
 header_type bier_t {
   fields {
     first_nibble : 4;
