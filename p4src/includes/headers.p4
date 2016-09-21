@@ -5,6 +5,7 @@ header_type intrinsic_metadata_t {
         mcast_hash : 16;
         recirculate_flag : 1;
         resubmit_flag : 1;
+        pad : 6;
     }
 }
 
