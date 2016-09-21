@@ -20,8 +20,9 @@ parser parse_ethernet {
 header bier_t bier;
 
 parser parse_bier {
-  extract(bier);
-  return ingress;
+    extract(ipv4);
+    extract(bier);
+    return ingress;
 }
 
 header ipv4_t ipv4;
