@@ -62,12 +62,17 @@ def main(args):
         net_sw2.setIP(ld_sw2['ip'], intf=net_link[1])
         net_sw2.setMAC(ld_sw2['mac'], intf=net_link[1])
 
-    #remove entries from routing tables
+    #remove entries from routing tables, disable ipv6
     for net_switch in net_switches:
         net_switch.cmd("ip route del 10.0.0.0/8")
         net_switch.cmd("ip route del 10.0.0.0/8")
         net_switch.cmd("ip route del 20.0.0.0/8")
         net_switch.cmd("ip route del 20.0.0.0/8")
+        #disable ipv6 to remove neighbouring packets
+        net_switch.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
+        net_switch.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
+        net_switch.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
+
     #remove entries from routing tables
     for switch in network['switches']:
 	for host in switch['hosts']:
