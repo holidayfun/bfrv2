@@ -30,3 +30,14 @@ cli.py -s 2 < do_cloning_table
 cli.py -s 3 < mirroring
 cli.py -s 3 < do_cloning_table
 cli.py -s 3 < mirroring
+
+
+
+cli.py -s 1 < do_decap_table
+cli.py -s 2 < do_decap_table
+cli.py -s 3 < do_decap_table
+
+cli.py -s 1 < do_restore_bier_table
+cli.py -s 2 < do_restore_bier_table
+cli.py -s 3 < do_restore_bier_table
+
