@@ -1,5 +1,4 @@
 
-metadata intrinsic_metadata_t intrinsic_metadata;
 table multicast_assoc {
     reads {
         ipv4.dstAddr : exact;
