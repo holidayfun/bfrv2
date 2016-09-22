@@ -13,7 +13,7 @@ control ingress {
         /* Filtern der Bits of Interes, Bit Mask steht in Metadaten */
 
         /* nur falls Paket frisch, nicht wenn es mitten in der Verarbeitung ist */
-        if(standard_metadata.instance_type == 0) {
+        if(bier_metadata.bits_of_interest == 0) {
             apply(bits_of_interest);
         }
 
@@ -81,7 +81,38 @@ control egress {
     if(bier_metadata.decap == 1) {
         apply(do_decap_table);
     }
+    apply(print_bitstring);
+    apply(print_bits_of_interest);
+    apply(print_bitstring_of_interest);
 }
+
+table print_bitstring_of_interest {
+    reads {
+        bier_metadata.BitString_of_interest : exact;
+    }
+    actions {
+        _drop;
+    }
+}
+table print_bits_of_interest {
+    reads {
+        bier_metadata.bits_of_interest : exact;
+    }
+    actions {
+        _drop;
+    }
+}
+table print_bitstring {
+    reads {
+        bier.BitString : exact;
+    }
+    actions {
+        _drop;
+    }
+}
+
+
+
 
 
 action save_bits_of_interest(bits_of_interest) {
@@ -92,12 +123,14 @@ action save_bits_of_interest(bits_of_interest) {
         Weitere Verarbeitung auf Basis des BitString_of_interest.
     */
     modify_field(bier.BitString, bier.BitString & ~ bits_of_interest);
+    /* save BitString for when the header needs to be reconstructed */
+    modify_field(bier_metadata.bs_remaining, bier.BitString);
 }
 
 table bits_of_interest {
     reads {
         /* TODO: wie bekommt man immer die selbe Antwort? */
-        0 : exact;
+        bier.BitString : lpm;
     }
     actions {
         save_bits_of_interest;
@@ -184,7 +217,7 @@ action forward_connected(nbr_port) {
     /* TODO: noch nicht fertig */
 
     /* Auf 0 setzen der bit_pos, die bearbeitet wurde */
-    modify_field(bier_metadata.BitString_of_interest, bier_metadata.BitString_of_interest & ~ (2 << (bier_metadata.bit_pos - 1)));
+    modify_field(bier_metadata.BitString_of_interest, bier_metadata.BitString_of_interest & ~ (1 << (bier_metadata.bit_pos - 1)));
     /*
     Markieren des Pakets, damit es später geklont wird
     */
@@ -197,6 +230,8 @@ action forward_connected(nbr_port) {
 
 action local_decap() {
     /* TODO: noch nicht fertig */
+    
+    modify_field(bier_metadata.BitString_of_interest, bier_metadata.BitString_of_interest & ~ (1 << (bier_metadata.bit_pos - 1)));
     /*
     constraint: Fest an Port 1 schicken
     */
@@ -268,7 +303,7 @@ table find_bit_pos {
         bier_metadata.BitString_of_interest : lpm;
     }
     actions {
-        save_pos;
+        save_bit_pos;
         _drop;
         /* default action sollte drop sein, dann wird ein BS der nur aus 0en besteht direkt verworfen */
     }

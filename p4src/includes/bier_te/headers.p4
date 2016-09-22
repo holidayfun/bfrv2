@@ -22,6 +22,7 @@ header_type bier_metadata_t {
         bit_pos : 6;
         bs_remaining: 64;
         bits_of_interest: 64;
+        BitString_of_interest: 64;
         needs_cloning : 1;
         decap : 1;
     }
