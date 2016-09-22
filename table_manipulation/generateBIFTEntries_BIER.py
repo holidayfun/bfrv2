@@ -4,7 +4,7 @@ import json
 
 p4_name = 'bfr'
 thrift_client_module = "p4_pd_rpc.bfr"
-file_templ = 'table_manipulation/bift_entries_{0}'
+file_templ = 'bier/bift_entries_{0}'
 bitsring_len = 16
 
 def main():
