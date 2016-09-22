@@ -1,34 +1,16 @@
 #!/bin/bash
 
-cli.py -s 1 < bier_te/bift_entries_s1
-
-cli.py -s 1 < bier_te/bier_ingress
-
-cli.py -s 1 < bier_te/find_bit_pos
-
-cli.py -s 1 < bier_te/do_cloning_table
-
-cli.py -s 1 < bier_te/do_clone_recirculation_table
-
-cli.py -s 1 < bier_te/mirroring
-
-cli.py -s 1 < bier_te/do_decap_table
-
-cli.py -s 1 < bier_te/do_restore_bier_table
+for ((i=1;i<=5;i++))
+do
+    echo $i
+    cli.py -s $i < bier_te/bift_entries_s$i
+    cli.py -s $i < bier_te/bier_ingress
+    cli.py -s $i < bier_te/find_bit_pos
+    cli.py -s $i < bier_te/do_cloning_table
+    cli.py -s $i < bier_te/do_clone_recirculation_table
+    cli.py -s $i < bier_te/mirroring
+    cli.py -s $i < bier_te/do_decap_table
+    cli.py -s $i < bier_te/do_restore_bier_table
+done
 
 
-cli.py -s 2 < bier_te/bift_entries_s2
-
-cli.py -s 2 < bier_te/bier_ingress
-
-cli.py -s 2 < bier_te/find_bit_pos
-
-cli.py -s 2 < bier_te/do_cloning_table
-
-cli.py -s 2 < bier_te/do_clone_recirculation_table
-
-cli.py -s 2 < bier_te/mirroring
-
-cli.py -s 2 < bier_te/do_decap_table
-
-cli.py -s 2 < bier_te/do_restore_bier_table
