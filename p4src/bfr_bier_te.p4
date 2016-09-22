@@ -1,7 +1,7 @@
-#include "includes/headers.p4"
-#include "includes/parser.p4"
-#include "includes/ip_forwarding.p4"
-#include "includes/classic_mc.p4"
+#include "includes/bier_te/headers.p4"
+#include "includes/bier_te/parser.p4"
+#include "includes/bier_te/ip_forwarding.p4"
+#include "includes/bier_te/classic_mc.p4"
 
 
 metadata routing_metadata_t routing_metadata;
@@ -11,24 +11,24 @@ metadata intrinsic_metadata_t intrinsic_metadata;
 control ingress {
     if(ethernet.etherType == 0xBBBB) {
         /* BIER Paket empfangen */
-        apply(find_pos) 
+        apply(find_pos)
         {
-            hit 
+            hit
             {
                 apply(check_bfr_id)
                 {
-                    miss /* Bit entspricht nicht der eigenen BFR-id */ 
+                    miss /* Bit entspricht nicht der eigenen BFR-id */
                     {
                         apply(bift);
                     }
                 }
             }
-        }        
-    } 
-    else if(ethernet.etherType == 0x0800) 
+        }
+    }
+    else if(ethernet.etherType == 0x0800)
     {
-        /* 
-            Kein Hinzufügen eines Headers, sollte das Paket ein decap sein 
+        /*
+            Kein Hinzufügen eines Headers, sollte das Paket ein decap sein
         */
         if(bier_metadata.decap == 0) {
             /*
@@ -37,7 +37,7 @@ control ingress {
             apply(bier_ingress);
         }
 
-        /* 
+        /*
             Falls kein BIER Header hinzugefügt wurde, handelt es sich um
             normalen IPv4 Verkehr, entsprechend Forwarding anwenden
         */
@@ -51,14 +51,14 @@ control ingress {
 
 control egress {
     if(standard_metadata.instance_type == 2) {
-        /* 
+        /*
             Falls ein egress Klon aus einem decap erzeugt wurde, dann wurde
             diesem Paket der Header entfernt und er muss neu angefügt werden
         */
         if(bier_metadata.decap == 1) {
             apply(do_restore_bier_table);
         }
-        
+
         /*
             wORKAROUND: clone_egress_to_ingress gibt es in bmv2 nicht.
             Daher clone_e2e mit anschließender recirculation
@@ -68,13 +68,13 @@ control egress {
         }
     } else if(bier_metadata.needs_cloning == 1 or bier_metadata.decap == 1) {
        apply(do_cloning_table);
-    } 
+    }
 
     /*
         PKT_INSTANCE_TYPE_EGRESS_CLONE - 2
         PKT_INSTANCE_TYPE_RECIRC - 4
         PKT_INSTANCE_TYPE_RESUBMIT - 6
-    */ 
+    */
     if (ethernet.etherType == 0x0800) {
         apply(send_frame);
     }
@@ -108,7 +108,7 @@ table do_cloning_table {
     Anpassen des BIER BitStrings
     Recirculation des Pakets zum Ingress
 */
-action do_clone_recirculation() {    
+action do_clone_recirculation() {
     modify_field(bier_metadata.needs_cloning, 0);
     modify_field(bier.BitString, bier_metadata.bs_remaining);
     recirculate(bier_FL);
@@ -166,7 +166,7 @@ action _drop() {
 */
 action bift_action(f_bm, nbr_port) {
     modify_field(bier_metadata.bs_remaining, bier.BitString & ~ f_bm);
-    /* 
+    /*
         Markieren des Pakets, damit es später geklont wird
     */
     modify_field(bier_metadata.needs_cloning, 1);
@@ -192,14 +192,14 @@ table bift {
 */
 action packet_for_bfr(bm) {
     modify_field(bier_metadata.bs_remaining, bier.BitString & ~ bm);
-    /* 
-        constraint: Fest an Port 1 schicken 
+    /*
+        constraint: Fest an Port 1 schicken
     */
     modify_field(standard_metadata.egress_spec, 1);
     modify_field(bier_metadata.needs_cloning, 1);
-    /* 
+    /*
         Paket muss entsprechend markiert werden, damit der Header später
-        entfernt wird 
+        entfernt wird
     */
     modify_field(bier_metadata.decap, 1);
 }
@@ -237,7 +237,7 @@ table bier_ingress {
   }
 }
 
-/* 
+/*
     Field List für die Felder, die bei der recirculation bzw. beim clone
     erhalten bleiben sollen.
 */
@@ -249,7 +249,7 @@ field_list bier_FL {
     standard_metadata;
 }
 
-/* 
+/*
     workaround zum Finden der Position der ersten 1 im BitString
     Sollte der BitString = 0 sein, wird kein Match gefunden und das Paket
     entsprechend verworfen.
