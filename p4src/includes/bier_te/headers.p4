@@ -10,17 +10,18 @@ header_type intrinsic_metadata_t {
 }
 
 header_type routing_metadata_t {
-    fields 
+    fields
     {
         nhop_ipv4 : 32;
     }
-}            
+}
 
 header_type bier_metadata_t {
-    fields 
-    {         
-        k_pos : 6;
-        bs_remaining: 16;
+    fields
+    {
+        bit_pos : 6;
+        bs_remaining: 64;
+        bits_of_interest: 64;
         needs_cloning : 1;
         decap : 1;
     }
@@ -32,7 +33,7 @@ header_type bier_t {
     Ver : 4;
     Len : 4;
     Entropy : 20;
-    BitString : 16;
+    BitString : 64;
     OAM : 2;
     Reserved : 10;
     Proto : 4;
