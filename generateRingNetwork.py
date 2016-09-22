@@ -1,5 +1,5 @@
 import json
-num_switches = 3
+num_switches = 5
 hosts_per_switch = 2
 
 network = { 'name': 'RingNetwork',
