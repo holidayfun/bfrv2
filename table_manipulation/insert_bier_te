@@ -1,0 +1,34 @@
+#!/bin/bash
+
+cli.py -s 1 < bier_te/bift_entries_s1
+
+cli.py -s 1 < bier_te/bier_ingress
+
+cli.py -s 1 < bier_te/find_bit_pos
+
+cli.py -s 1 < bier_te/do_cloning_table
+
+cli.py -s 1 < bier_te/do_clone_recirculation_table
+
+cli.py -s 1 < bier_te/mirroring
+
+cli.py -s 1 < bier_te/do_decap_table
+
+cli.py -s 1 < bier_te/do_restore_bier_table
+
+
+cli.py -s 2 < bier_te/bift_entries_s2
+
+cli.py -s 2 < bier_te/bier_ingress
+
+cli.py -s 2 < bier_te/find_bit_pos
+
+cli.py -s 2 < bier_te/do_cloning_table
+
+cli.py -s 2 < bier_te/do_clone_recirculation_table
+
+cli.py -s 2 < bier_te/mirroring
+
+cli.py -s 2 < bier_te/do_decap_table
+
+cli.py -s 2 < bier_te/do_restore_bier_table
