@@ -5,11 +5,11 @@ import math
 
 p4_name = 'bfr'
 thrift_client_module = "p4_pd_rpc.bfr"
-file_templ = 'table_manipulation/bier_te/bift_entries_{0}_BIER-TE'
+file_templ = 'bier_te/bift_entries_{0}'
 
 
 def main():
-    network = json.load(open('RingNetwork.json', 'r'))
+    network = json.load(open('../RingNetwork.json', 'r'))
     num_switches = len(network['switches'])
     max_port_num = 4
     #we need num_switches + num_switches * max_port_num bits
@@ -25,27 +25,30 @@ def main():
         switches_list.append(switch)
         thrift_server = switch['control_network_ip']
         #Default drop packet
-        append_entry_file("table_set_default bift _drop", switch['name'])
+        #append_entry_file("table_set_default bift _drop", switch['name'])
 
     for i in range(0, num_switches):
         bits_of_interest = ['0'] * bitsring_len
         bits_of_interest[bitsring_len - i - 1] = '1'
 
-        append_entry_file("table_add bift_bier_te local_decap {0} =>".format(i + 1), switches_list[i]['name'])
+        append_entry_file("table_add bift local_decap {0} =>".format(i + 1), switches_list[i]['name'])
         #Erste X ports sind hosts
         port_offset = len(switch['hosts']) + 1
         for j in range(0, max_port_num):
             bit_pos = (i * max_port_num) + j + num_switches
             bits_of_interest[bitsring_len - bit_pos - 1] = '1'
 
-            append_entry_file("table_add bift_bier_te forward_connected {0} => {1}".format(bit_pos + 1, port_offset + j), switches_list[i]['name'])
+            append_entry_file("table_add bift forward_connected {0} => {1}".format(bit_pos + 1, port_offset + j), switches_list[i]['name'])
 
-        append_entry_file("table_add bits_of_interest save_bits_of_interest => " + "".join(bits_of_interest), switches_list[i]['name'])
+        append_entry_file("table_add bits_of_interest save_bits_of_interest 0/0 => 0b" + "".join(bits_of_interest), switches_list[i]['name'])
+
+        #append_entry_file("table_add bits_of_interest save_bits_of_interest 1/1 => " + "".join(bits_of_interest), switches_list[i]['name'])
+
 
 def silent_rm(path):
     try:
         os.remove(path)
-    except FileNotFoundError:
+    except:
         pass
 def append_entry_file(line, switch_name):
     with open(file_templ.format(switch_name), 'a') as fh:
