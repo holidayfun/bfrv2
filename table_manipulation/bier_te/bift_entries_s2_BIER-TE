@@ -1,0 +1,7 @@
+table_set_default bift _drop
+table_add bift_bier_te local_decap 2 =>
+table_add bift_bier_te forward_connected 10 => 3
+table_add bift_bier_te forward_connected 11 => 4
+table_add bift_bier_te forward_connected 12 => 5
+table_add bift_bier_te forward_connected 13 => 6
+table_add bits_of_interest save_bits_of_interest => 00000000000000000001111000000010
