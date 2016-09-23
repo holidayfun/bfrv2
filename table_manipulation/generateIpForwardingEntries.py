@@ -1,6 +1,14 @@
 import os
 import json
 
+##############################################################
+# Achtung:                                                   #
+#    Erzeugt nur korrekte Eintraege fuer sehr einfach Netze. #
+#    Alle anderen muessten von Hand kodiert werden           #
+##############################################################
+
+
+
 p4_name = 'bfr'
 thrift_client_module = "p4_pd_rpc.bfr"
 file_templ = 'ip_forwarding/entries_{0}'
