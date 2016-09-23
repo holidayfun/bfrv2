@@ -1,4 +1,3 @@
-import sys
 import os
 import json
 
@@ -7,7 +6,7 @@ thrift_client_module = "p4_pd_rpc.bfr"
 file_templ = 'ip_forwarding/entries_{0}'
 
 def main():
-    network = json.load(open('RingNetwork.json', 'r'))
+    network = json.load(open('../RingNetwork.json', 'r'))
     #remove old files
     for switch in network['switches']:
         silent_rm(file_templ.format(switch['name']))
@@ -21,8 +20,8 @@ def main():
         append_entry_file("table_set_default ipv4_lpm _drop", switch['name'])
         append_entry_file("table_set_default forward _drop", switch['name'])
         append_entry_file("table_set_default send_frame _drop", switch['name'])
-        #Einträge für Hosts, die am switch hängen
-        action_port = 1 #port nummerierung wi folgt: h1 -> 1, h2 -> 2,...
+        #Eintraege fuer Hosts, die am switch haengen
+        action_port = 1 #port nummerierung wie folgt: h1 -> 1, h2 -> 2,...
         for host in switch['hosts']:
             ip_entry = {'ip': host['ip'], 'prefix_len': 32, 'next_hop': host['ip'], 'action_port': action_port}
             forward_entry = {'ip': host['ip'], 'dmac': host['mac']}
@@ -56,7 +55,7 @@ def main():
 def silent_rm(path):
     try:
         os.remove(path)
-    except FileNotFoundError:
+    except:
         pass
 
 def append_entry_file(line, switch_name):

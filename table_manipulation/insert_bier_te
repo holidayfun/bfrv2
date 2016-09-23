@@ -11,6 +11,7 @@ do
     cli.py -s $i < bier_te/mirroring
     cli.py -s $i < bier_te/do_decap_table
     cli.py -s $i < bier_te/do_restore_bier_table
+    cli.py -s $i < bier_te/mc_overlay_s$i
 done
 
 
