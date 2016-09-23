@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for ((i=1;i<=5;i++))
+for ((i=1;i<=8;i++))
 do
     echo $i
     cli.py -s $i < bier_te/bift_entries_s$i
@@ -11,7 +11,8 @@ do
     cli.py -s $i < bier_te/mirroring
     cli.py -s $i < bier_te/do_decap_table
     cli.py -s $i < bier_te/do_restore_bier_table
-    cli.py -s $i < bier_te/mc_overlay_s$i
+    #cli.py -s $i < bier_te/mc_overlay_s$i
+    cli.py -s $i < bier_te/mc_overlay
     cli.py -s $i < ip_forwarding/entries_s$i
 done
 

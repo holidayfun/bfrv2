@@ -1,0 +1,12 @@
+table_set_default ipv4_lpm _drop
+table_set_default forward _drop
+table_set_default send_frame _drop
+table_add ipv4_lpm set_nhop 10.0.7.8/32 => 10.0.7.8 0001
+table_add forward set_dmac 10.0.7.8 => aa:00:00:00:07:08
+table_add send_frame rewrite_mac 1 => aa:aa:00:00:07:08
+table_add ipv4_lpm set_nhop 10.0.4.0/24 => 20.0.0.13 0002
+table_add forward set_dmac 20.0.0.13 => aa:dd:00:00:00:13
+table_add send_frame rewrite_mac 2 => aa:dd:00:00:00:14
+table_add ipv4_lpm set_nhop 10.0.6.0/24 => 20.0.0.17 0003
+table_add forward set_dmac 20.0.0.17 => aa:dd:00:00:00:17
+table_add send_frame rewrite_mac 3 => aa:dd:00:00:00:18

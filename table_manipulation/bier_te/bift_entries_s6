@@ -1,0 +1,6 @@
+table_add bift local_decap 6 =>
+table_add bift forward_connected 29 => 2
+table_add bift forward_connected 30 => 3
+table_add bift forward_connected 31 => 4
+table_add bift forward_connected 32 => 5
+table_add bits_of_interest save_bits_of_interest 0/0 => 0b0000000000000000000000000000000011110000000000000000000000100000
