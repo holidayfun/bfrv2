@@ -9,7 +9,7 @@ file_templ = 'bier_te/bift_entries_{0}'
 
 
 def main():
-    network = json.load(open('../RingNetwork.json', 'r'))
+    network = json.load(open('../in_use_network.json', 'r'))
     num_switches = len(network['switches'])
     max_port_num = 4
     #we need num_switches + num_switches * max_port_num bits

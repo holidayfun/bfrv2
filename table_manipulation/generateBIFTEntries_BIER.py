@@ -1,4 +1,3 @@
-import sys
 import os
 import json
 
@@ -8,7 +7,7 @@ file_templ = 'bier/bift_entries_{0}'
 bitsring_len = 16
 
 def main():
-    network = json.load(open('RingNetwork.json', 'r'))
+    network = json.load(open('../in_use_network.json', 'r'))
     num_switches = len(network['switches'])
     #remove old files
     for switch in network['switches']:
@@ -28,8 +27,8 @@ def main():
         #here in RingNetwork:
         #the next num_switches/2 bfrs are reached through neigbour switch+1
         #the previous num_switches/2 bfrs are reached through neigbour switch-1
-        next_nbr = switches_list[(i + 1) % num_switches]
-        prev_nbr = switches_list[(i - 1) % num_switches]
+        #next_nbr = switches_list[(i + 1) % num_switches]
+        #prev_nbr = switches_list[(i - 1) % num_switches]
         for j in range(0, int(num_switches/2)):
             next_bitstring[-switches_list[(i + 1 + j) % num_switches]['number']] = '1'
         #no switch should be in prev and next, so a little special case is needed
@@ -52,7 +51,7 @@ def main():
 def silent_rm(path):
     try:
         os.remove(path)
-    except FileNotFoundError:
+    except:
         pass
 def append_entry_file(line, switch_name):
     with open(file_templ.format(switch_name), 'a') as fh:

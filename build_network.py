@@ -12,7 +12,7 @@ import argparse
 import json
 
 
-network = json.load(open('RingNetwork.json', 'r'))
+network = json.load(open('in_use_network.json', 'r'))
 
 
 def main(args):

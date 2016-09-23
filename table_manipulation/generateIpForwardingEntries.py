@@ -6,7 +6,7 @@ thrift_client_module = "p4_pd_rpc.bfr"
 file_templ = 'ip_forwarding/entries_{0}'
 
 def main():
-    network = json.load(open('../RingNetwork.json', 'r'))
+    network = json.load(open('../in_use_network.json', 'r'))
     #remove old files
     for switch in network['switches']:
         silent_rm(file_templ.format(switch['name']))
