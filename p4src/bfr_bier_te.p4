@@ -237,6 +237,10 @@ action local_decap() {
     */
     modify_field(standard_metadata.egress_spec, 1);
     modify_field(bier_metadata.needs_cloning, 1);
+    
+    /* multicast overlay */
+    modify_field(intrinsic_metadata.mcast_grp, 1);
+
     /*
     Paket muss entsprechend markiert werden, damit der Header später
     entfernt wird
