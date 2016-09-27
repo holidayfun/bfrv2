@@ -20,11 +20,15 @@ def main():
     name_to_vertex = {}
     vprop_name = g.new_vertex_property("string")
     vprop_dev = g.new_vertex_property("int")
+    vprop_bp = g.new_vertex_property("int")
+    bp = 1
     for switch in network['switches']:
         v_switch = g.add_vertex()
         name_to_vertex[switch['name']] = v_switch
         vprop_name[v_switch] = switch['name']
         vprop_dev[v_switch] = 1
+        vprop_bp[v_switch] = bp
+        bp += 1
         for host in switch['hosts']:
             v_host = g.add_vertex()
             g.add_edge(v_switch, v_host)
@@ -67,11 +71,14 @@ def main():
         #NNHs
         v_switch = name_to_vertex[switches_list[i]['name']]
         print("NNHs of {0}".format(switches_list[i]['name']))
+        nnhs = ['0'] * bitsring_len
+
         for nh in v_switch.out_neighbours():
             for nnh in nh.out_neighbours():
                 if nnh != v_switch and vprop_dev[nnh] == 1:
-                    print(vprop_name[nnh])
+                    nnhs[bitsring_len - vprop_bp[nnh]] = '1'
 
+        print("".join(nnhs))
 
         #append_entry_file("table_add bits_of_interest save_bits_of_interest 1/1 => " + "".join(bits_of_interest), switches_list[i]['name'])
 
