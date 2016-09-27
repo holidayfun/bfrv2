@@ -3,8 +3,10 @@ parser start {
 }
 /* BIER doesn't have an specific ethertype */
 #define ETHERTYPE_BIER 0xBBBB
-
 #define ETHERTYPE_IPV4 0x0800
+
+#define BIER_PROTO_BIER 0xBB
+#define BIER_PROTO_IPV4 0x08
 
 header ethernet_t ethernet;
 
@@ -17,12 +19,16 @@ parser parse_ethernet {
     }
 }
 
-header bier_t bier;
+header bier_t bier[2];
 
 parser parse_bier {
-    extract(ipv4);
-    extract(bier);
-    return ingress;
+    //extract(ipv4);
+    extract(bier[next]);
+    return select(latest.Proto) {
+        BIER_PROTO_BIER : parse_bier;
+        BIER_PROTO_IPV4 : parse_ipv4;
+        default : ingress;
+    }
 }
 
 header ipv4_t ipv4;

@@ -106,7 +106,7 @@ action a_r_bm_recursion(add_bm, reset_bm) {
 
 table btaft {
     reads {
-
+        bier_frr_metadata.bp: exact;
 
     }
     actions {
@@ -269,7 +269,7 @@ action local_decap() {
     /*
     constraint: Fest an Port 1 schicken
     */
-    modify_field(standard_metadata.egress_spec, 1);
+    //modify_field(standard_metadata.egress_spec, 1);
     modify_field(bier_metadata.needs_cloning, 1);
 
     /* multicast overlay */
@@ -302,6 +302,7 @@ action add_bier_header(bitstring) {
     add_header(bier);
     modify_field(bier.BitString, bitstring);
     modify_field(ethernet.etherType, 0xBBBB);
+    modify_field(bier.Proto, 0x08);
     recirculate(bier_FL);
 }
 
