@@ -6,6 +6,7 @@
 metadata routing_metadata_t routing_metadata;
 metadata bier_metadata_t bier_metadata;
 metadata intrinsic_metadata_t intrinsic_metadata;
+metadata bier_frr_metadata_t bier_frr_metadata;
 
 control ingress {
     if(ethernet.etherType == 0xBBBB) {
@@ -85,6 +86,39 @@ control egress {
     apply(print_bits_of_interest);
     apply(print_bitstring_of_interest);
 }
+
+action a_r_bm_apply() {
+    modify_field(bier_frr_metadata.needs_recursion, 0);
+
+    modify_field(bier.BitString, bier_frr_metadata.reset_bm);
+
+    //add new header
+
+    
+}
+
+action a_r_bm_recursion(add_bm, reset_bm) {
+    modify_field(bier_frr_metadata.add_bm, bier_frr_metadata.add_bm | add_bm);
+    modify_field(bier_frr_metadata.reset_bm, bier_frr_metadata.reset_bm | reset_bm);
+
+    modify_field(bier_frr_metadata.needs_recursion, 1);
+}
+
+table btaft {
+    reads {
+
+
+    }
+    actions {
+        a_r_bm_recursion; //Betrachte nächsten Eintrag und verbinde bisherige bm mit den neuen
+        a_r_bm_apply; //default action, falls kein Hit in der BTAFT
+    }
+
+}
+
+
+
+
 
 table print_bitstring_of_interest {
     reads {
@@ -230,14 +264,14 @@ action forward_connected(nbr_port) {
 
 action local_decap() {
     /* TODO: noch nicht fertig */
-    
+
     modify_field(bier_metadata.BitString_of_interest, bier_metadata.BitString_of_interest & ~ (1 << (bier_metadata.bit_pos - 1)));
     /*
     constraint: Fest an Port 1 schicken
     */
     modify_field(standard_metadata.egress_spec, 1);
     modify_field(bier_metadata.needs_cloning, 1);
-    
+
     /* multicast overlay */
     modify_field(intrinsic_metadata.mcast_grp, 1);
 

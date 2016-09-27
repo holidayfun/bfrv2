@@ -9,6 +9,13 @@ header_type intrinsic_metadata_t {
     }
 }
 
+header_type bier_frr_metadata_t {
+    add_bm : 64;
+    reset_bm : 64;
+    bp: 8;
+    needs_recursion: 1;    
+}
+
 header_type routing_metadata_t {
     fields
     {
