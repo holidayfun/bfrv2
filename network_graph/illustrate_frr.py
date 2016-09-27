@@ -19,7 +19,6 @@ for switch in network['switches']:
     vprop_size[v_switch] = 50
     vprop_shape[v_switch] = "hexagon"
     for host in switch['hosts']:
-        break;
         v_host = g.add_vertex()
         e_link = g.add_edge(v_switch, v_host)
         vprop_text[v_host] = host['name']
@@ -44,6 +43,17 @@ pos[name_to_vertex['s5']] = [3, 1.5]
 pos[name_to_vertex['s6']] = [2, 2]
 pos[name_to_vertex['s7']] = [1, 2.5]
 pos[name_to_vertex['s8']] = [3, 2.5]
+
+pos[name_to_vertex['h1']] = [2, -0.7]
+pos[name_to_vertex['h2']] = [3.5, 0]
+pos[name_to_vertex['h3']] = [1.5, 0.5]
+pos[name_to_vertex['h4']] = [0.5, 1]
+pos[name_to_vertex['h5']] = [3.7, 1.5]
+pos[name_to_vertex['h6']] = [2, 2.7]
+pos[name_to_vertex['h7']] = [0.5, 2.9]
+pos[name_to_vertex['h8']] = [3.5, 2.9]
+
+
 
 graph_draw( g,
             pos,
