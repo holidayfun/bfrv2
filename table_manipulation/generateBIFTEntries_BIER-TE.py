@@ -1,7 +1,7 @@
-import sys
 import os
 import json
 import math
+from graph_tool.all import Graph
 
 p4_name = 'bfr'
 thrift_client_module = "p4_pd_rpc.bfr"
@@ -18,13 +18,20 @@ def main():
     #Generate graph representation of network
     g = Graph(directed=False)
     name_to_vertex = {}
+    vprop_name = g.new_vertex_property("string")
+    vprop_dev = g.new_vertex_property("int")
     for switch in network['switches']:
         v_switch = g.add_vertex()
         name_to_vertex[switch['name']] = v_switch
+        vprop_name[v_switch] = switch['name']
+        vprop_dev[v_switch] = 1
         for host in switch['hosts']:
             v_host = g.add_vertex()
-            e_link = g.add_edge(v_switch, v_host)
+            g.add_edge(v_switch, v_host)
             name_to_vertex[host['name']] = v_host
+            vprop_name[v_host] = host['name']
+            vprop_dev[v_host] = 2
+
     for link in network['switch_links']:
         v_node1 = name_to_vertex[link['node1']['name']]
         v_node2 = name_to_vertex[link['node2']['name']]
@@ -38,7 +45,7 @@ def main():
     for switch in network['switches']:
         switches_dict[switch['name']] = switch
         switches_list.append(switch)
-        thrift_server = switch['control_network_ip']
+        #thrift_server = switch['control_network_ip']
         #Default drop packet
         #append_entry_file("table_set_default bift _drop", switch['name'])
 
@@ -59,10 +66,11 @@ def main():
 
         #NNHs
         v_switch = name_to_vertex[switches_list[i]['name']]
+        print("NNHs of {0}".format(switches_list[i]['name']))
         for nh in v_switch.out_neighbours():
             for nnh in nh.out_neighbours():
-                if nnh != v_switch:
-                    print(nnh)
+                if nnh != v_switch and vprop_dev[nnh] == 1:
+                    print(vprop_name[nnh])
 
 
         #append_entry_file("table_add bits_of_interest save_bits_of_interest 1/1 => " + "".join(bits_of_interest), switches_list[i]['name'])
