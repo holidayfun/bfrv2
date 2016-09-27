@@ -15,6 +15,21 @@ def main():
     #we need num_switches + num_switches * max_port_num bits
     bitsring_len = int(math.pow(2, math.ceil(math.log(num_switches * (max_port_num + 1), 2))))
 
+    #Generate graph representation of network
+    g = Graph(directed=False)
+    name_to_vertex = {}
+    for switch in network['switches']:
+        v_switch = g.add_vertex()
+        name_to_vertex[switch['name']] = v_switch
+        for host in switch['hosts']:
+            v_host = g.add_vertex()
+            e_link = g.add_edge(v_switch, v_host)
+            name_to_vertex[host['name']] = v_host
+    for link in network['switch_links']:
+        v_node1 = name_to_vertex[link['node1']['name']]
+        v_node2 = name_to_vertex[link['node2']['name']]
+        g.add_edge(v_node1, v_node2)
+
     #remove old files
     for switch in network['switches']:
         silent_rm(file_templ.format(switch['name']))
@@ -41,6 +56,14 @@ def main():
             append_entry_file("table_add bift forward_connected {0} => {1}".format(bit_pos + 1, port_offset + j), switches_list[i]['name'])
 
         append_entry_file("table_add bits_of_interest save_bits_of_interest 0/0 => 0b" + "".join(bits_of_interest), switches_list[i]['name'])
+
+        #NNHs
+        v_switch = name_to_vertex[switches_list[i]['name']]
+        for nh in v_switch.out_neighbours():
+            for nnh in nh.out_neighbours():
+                if nnh != v_switch:
+                    print(nnh)
+
 
         #append_entry_file("table_add bits_of_interest save_bits_of_interest 1/1 => " + "".join(bits_of_interest), switches_list[i]['name'])
 
