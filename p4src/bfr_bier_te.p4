@@ -22,7 +22,17 @@ control ingress {
         {
             hit
             {
-                apply(bift);
+                apply(frr_indication)
+                {
+                    hit
+                    {
+                        apply(btaft);
+                    }
+                    miss
+                    {
+                        apply(bift);
+                    }
+                }
             }
         }
     }
@@ -87,13 +97,37 @@ control egress {
     apply(print_bitstring_of_interest);*/
 }
 
+
+action save_bp(bp) {
+    modify_field(bier_frr_metadata.bp, bp);
+}
+
+table frr_indication {
+    reads {
+        //Eintrag mit 0/0 lpm um hit zu erzeugen, sobald Eintrag vorhaden
+        bier.BitString: lpm;
+    }
+    actions {
+        save_bp;
+    }
+}
+
+
 action a_r_bm_apply() {
+    //evtl muss das hier anders umgesetzt werden.
+    //sonst wird bei nicht noetigen FRR trotzdem ein neuer BIER Header drauf gesetzt und das Paket geht dann ins Leere
+    //evtl falls miss in btaft prüfen, ob reset bzw add 0 sind und falls ja kein header hinzufügen
+
     modify_field(bier_frr_metadata.needs_recursion, 0);
 
+    //apply reset on inner BIER Header
     modify_field(bier.BitString, bier_frr_metadata.reset_bm);
 
-    //add new header
-
+    //add new header on top
+    add_header(bier[0]);
+    //apply add on outer BIER Header
+    modify_field(bier[0].BitString, bier_frr_metadata.add_bm);
+    
     
 }
 
@@ -107,6 +141,7 @@ action a_r_bm_recursion(add_bm, reset_bm) {
 table btaft {
     reads {
         bier_frr_metadata.bp: exact;
+        bier_frr_metadata.nnh: exact;
 
     }
     actions {
@@ -115,6 +150,13 @@ table btaft {
     }
 
 }
+
+
+/*
+    Tabelle, um 
+
+*/
+
 
 
 

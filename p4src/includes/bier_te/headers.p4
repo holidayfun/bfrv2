@@ -15,6 +15,7 @@ header_type bier_frr_metadata_t {
         reset_bm : 64;
         bp : 8;
         needs_recursion : 1;
+        nnh: 8;
     }
 }
 
