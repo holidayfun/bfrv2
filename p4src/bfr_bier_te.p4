@@ -82,9 +82,9 @@ control egress {
     if(bier_metadata.decap == 1) {
         apply(do_decap_table);
     }
-    apply(print_bitstring);
+    /*apply(print_bitstring);
     apply(print_bits_of_interest);
-    apply(print_bitstring_of_interest);
+    apply(print_bitstring_of_interest);*/
 }
 
 action a_r_bm_apply() {
@@ -339,7 +339,7 @@ action save_bit_pos(bit_pos) {
 
 table find_bit_pos {
     reads {
-        bier_metadata.BitString_of_interest : lpm;
+        bier_metadata.BitString_of_interest : ternary;
     }
     actions {
         save_bit_pos;
