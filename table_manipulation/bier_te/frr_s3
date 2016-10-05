@@ -1,4 +1,4 @@
 table_add frr_indication save_bp 0/0 => 20
 table_add btaft a_r_bm_recursion 0x14 0b00000000000000000000000001000000&&&0b00000000000000000000000001000000 => 0b0000001000000000001000100000000001100000 0b0000000000100000000010000000000000000000 7 1
 table_set_default btaft a_r_bm_apply
-table_set_default frr_bitstring save_bitstring_to_metadata
+table_set_default frr_copy_bitstring save_frr_bitstring
