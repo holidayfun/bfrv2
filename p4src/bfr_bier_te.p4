@@ -9,23 +9,25 @@ metadata intrinsic_metadata_t intrinsic_metadata;
 metadata bier_frr_metadata_t bier_frr_metadata;
 
 control ingress {
+    apply(print_ingress_start);
     if(ethernet.etherType == 0xBBBB) {
         /* BIER-TE Paket empfangen */
         /* Filtern der Bits of Interes, Bit Mask steht in Metadaten */
 
         /* nur falls Paket frisch, nicht wenn es mitten in der Verarbeitung ist */
         if(bier_metadata.bits_of_interest == 0) {
-            apply(bits_of_interest);
+            apply(get_bits_of_interest);
         }
 
         apply(frr_indication);
         
-        apply(print_flow_affected);
         //falls Fehler ueberhaupt eine Auswirkung hat
         if(bier_frr_metadata.flow_affected > 0)
         {
             if(bier_frr_metadata.BitString == 0) {
-                apply(frr_bitstring);
+                apply(frr_copy_bitstring);
+
+                //hier sehen wir das Paket zum ersten mal, evtl direkt hier Kopie davon erstellen und mit geclearter fehler BP neu verarbeiten
             }               
             apply(btaft);
         }
@@ -36,9 +38,13 @@ control ingress {
                 hit
                 {
                     apply(bift);
+                    //evtl hier, falls locap decap geschah
+                    //schauen, ob noch ein bier header da ist und evtl
+                    //recirculation durchführen
                 }
             }
         }
+
     }
     else if(ethernet.etherType == 0x0800)
     {
@@ -62,9 +68,11 @@ control ingress {
             apply(forward);
         }
     }
+    apply(print_ingress_end);
 }
 
 control egress {
+    apply(print_egress_start);
     if(standard_metadata.instance_type == 2) {
         /*
         Falls ein egress Klon aus einem decap erzeugt wurde, dann wurde
@@ -78,12 +86,19 @@ control egress {
         wORKAROUND: clone_egress_to_ingress gibt es in bmv2 nicht.
         Daher clone_e2e mit anschließender recirculation
         */
-        //Gleicher Workaround fuer mehrmaligen Match auf BTAFT
-        if(bier_metadata.needs_cloning == 1 or bier_frr_metadata.needs_recursion == 1) {
+        if(bier_metadata.needs_cloning == 1) {
             apply(do_clone_recirculation_table);
         }
-        
-    } else if(bier_metadata.needs_cloning == 1 or bier_metadata.decap == 1 or bier_frr_metadata.needs_recursion == 1) {
+        //Gleicher Workaround fuer mehrmaligen Match auf BTAFT
+        if(bier_frr_metadata.needs_recursion == 1 or 
+            bier_frr_metadata.needs_cloning == 1) {
+            apply(do_frr_recursion);
+        }
+    
+    } else if(bier_metadata.needs_cloning == 1 
+    or bier_metadata.decap == 1 
+    or bier_frr_metadata.needs_recursion == 1 
+    or bier_frr_metadata.needs_cloning == 1) {
         apply(do_cloning_table);
     }
 
@@ -99,19 +114,14 @@ control egress {
         apply(do_decap_table);
     }
     
-    apply(print_bitstring);
-    apply(print_add_bm);
-    apply(print_reset_bm);
-    /*apply(print_bitstring_of_interest);*/
+    apply(print_egress_end);
 }
 
 
 action save_bp(bp) {
     modify_field(bier_frr_metadata.bp, bp);
-    
     //check if this position affects the flow
     modify_field(bier_frr_metadata.flow_affected, bier_metadata.BitString_of_interest & (1 << (bp - 1)));
-
 }
 
 table frr_indication {
@@ -131,13 +141,27 @@ action a_r_bm_apply() {
     //evtl falls miss in btaft prüfen, ob reset bzw add 0 sind und falls ja kein header hinzufügen
 
     //apply reset on inner BIER Header
-    modify_field(bier.BitString, bier_frr_metadata.reset_bm);
+    modify_field(bier.BitString, bier.BitString & ~bier_frr_metadata.reset_bm);
+    
+    //copy the old header to inner header
+    copy_header(bier[1], bier[0]);
 
     //add new header on top
     add_header(bier[0]);
+    //set next proto field
+    modify_field(bier[0].Proto, BIER_PROTO_BIER); 
+
     //apply add on outer BIER Header
     modify_field(bier[0].BitString, bier_frr_metadata.add_bm);
+    
+    //no more recursion
+    modify_field(bier_frr_metadata.needs_recursion, 0);
 
+    //but a cloning to recirculate
+    modify_field(bier_frr_metadata.needs_cloning, 1);
+
+    //we must reset the boi to recalculate them in the next recirculation
+    modify_field(bier_metadata.bits_of_interest, 0);
 }
 
 action a_r_bm_recursion(add_bm, reset_bm, nnh_bp) {
@@ -161,23 +185,7 @@ table btaft {
 }
 
 
-table print_add_bm {
-    reads {
-        bier_frr_metadata.add_bm : exact;
-    }
-    actions {
-        _drop;
-    }
-}
-table print_reset_bm {
-    reads {
-        bier_frr_metadata.reset_bm : exact;
-    }
-    actions {
-        _drop;
-    }
-}
-table print_bitstring {
+table print_ingress_start {
     reads {
         bier.BitString : exact;
     }
@@ -185,22 +193,68 @@ table print_bitstring {
         _drop;
     }
 }
-table print_flow_affected {
+
+table print_ingress_end {
     reads {
-        bier_frr_metadata.flow_affected: exact;
+        bier_frr_metadata.add_bm:exact;
+        bier_frr_metadata.reset_bm : exact;
+        bier[0].BitString : exact;
+        bier[1].BitString : exact;
+        bier_frr_metadata.flow_affected:exact;
+        bier[0].Proto:exact;
+        bier[1].Proto:exact;
+        bier_metadata.BitString_of_interest:exact;
     }
     actions {
         _drop;
     }
 }
 
-action save_bitstring_to_metadata() {
+
+
+table print_egress_start {
+    reads {
+        bier_frr_metadata.add_bm:exact;
+        bier_frr_metadata.reset_bm : exact;
+        bier[0].BitString : exact;
+        bier[1].BitString : exact;
+        bier_frr_metadata.flow_affected:exact;
+        bier[0].Proto:exact;
+        bier[1].Proto:exact;
+        bier_metadata.BitString_of_interest:exact;
+    }
+    actions {
+        _drop;
+    }
+}
+
+table print_egress_end {
+    reads {
+        bier_frr_metadata.add_bm:exact;
+        bier_frr_metadata.reset_bm : exact;
+        bier[0].BitString : exact;
+        bier[1].BitString : exact;
+        bier_frr_metadata.flow_affected:exact;
+        bier[0].Proto:exact;
+        bier[1].Proto:exact;
+        bier_metadata.BitString_of_interest:exact;
+        bier_metadata.needs_cloning:exact;
+        bier_frr_metadata.needs_recursion:exact;
+        bier_frr_metadata.needs_cloning:exact;
+    }
+    actions {
+        _drop;
+    }
+}
+
+
+action save_frr_bitstring() {
     modify_field(bier_frr_metadata.BitString, bier.BitString);
 }
 
-table frr_bitstring {
+table frr_copy_bitstring {
     actions {
-        save_bitstring_to_metadata;
+        save_frr_bitstring;
     }
 }
 
@@ -217,9 +271,8 @@ action save_bits_of_interest(bits_of_interest) {
     modify_field(bier_metadata.bs_remaining, bier.BitString);
 }
 
-table bits_of_interest {
+table get_bits_of_interest {
     reads {
-        /* TODO: wie bekommt man immer die selbe Antwort? */
         bier.BitString : lpm;
     }
     actions {
@@ -246,6 +299,19 @@ table do_cloning_table {
     }
 }
 
+
+
+action frr_recursion() {
+    modify_field(bier_metadata.needs_cloning, 0);
+    recirculate(bier_FL);
+}
+
+table do_frr_recursion {
+    actions {
+        frr_recursion;
+    }
+}
+
 /*
 WORKAROUND für clone_e2i
 Zurücksetzen des needs_cloning bits
@@ -257,7 +323,6 @@ action do_clone_recirculation() {
     modify_field(bier.BitString, bier_metadata.bs_remaining);
     recirculate(bier_FL);
 }
-
 table do_clone_recirculation_table {
     reads {
         standard_metadata.instance_type : exact;
@@ -304,8 +369,6 @@ action _drop() {
 }
 
 action forward_connected(nbr_port) {
-    /* TODO: noch nicht fertig */
-
     /* Auf 0 setzen der bit_pos, die bearbeitet wurde */
     modify_field(bier_metadata.BitString_of_interest, bier_metadata.BitString_of_interest & ~ (1 << (bier_metadata.bit_pos - 1)));
     /*
@@ -330,7 +393,7 @@ action local_decap() {
 
     /* multicast overlay */
     modify_field(intrinsic_metadata.mcast_grp, 1);
-
+    
     /*
     Paket muss entsprechend markiert werden, damit der Header später
     entfernt wird
