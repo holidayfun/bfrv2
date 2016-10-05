@@ -66,7 +66,7 @@ def main():
 
             append_entry_file("table_add bift forward_connected {0} => {1}".format(bit_pos + 1, port_offset + j), switches_list[i]['name'])
 
-        append_entry_file("table_add bits_of_interest save_bits_of_interest 0/0 => 0b" + "".join(bits_of_interest), switches_list[i]['name'])
+        append_entry_file("table_add get_bits_of_interest save_bits_of_interest 0/0 => 0b" + "".join(bits_of_interest), switches_list[i]['name'])
 
         #NNHs
         v_switch = name_to_vertex[switches_list[i]['name']]

@@ -3,4 +3,4 @@ table_add bift forward_connected 21 => 2
 table_add bift forward_connected 22 => 3
 table_add bift forward_connected 23 => 4
 table_add bift forward_connected 24 => 5
-table_add bits_of_interest save_bits_of_interest 0/0 => 0b0000000000000000000000000000000000000000111100000000000000001000
+table_add get_bits_of_interest save_bits_of_interest 0/0 => 0b0000000000000000000000000000000000000000111100000000000000001000
