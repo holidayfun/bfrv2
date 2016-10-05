@@ -1,0 +1,442 @@
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Adding entry to exact match table bift
+match key:           EXACT-06
+action:              local_decap
+runtime data:        
+Entry has been added with handle 0
+RuntimeCmd: Adding entry to exact match table bift
+match key:           EXACT-1d
+action:              forward_connected
+runtime data:        00:02
+Entry has been added with handle 1
+RuntimeCmd: Adding entry to exact match table bift
+match key:           EXACT-1e
+action:              forward_connected
+runtime data:        00:03
+Entry has been added with handle 2
+RuntimeCmd: Adding entry to exact match table bift
+match key:           EXACT-1f
+action:              forward_connected
+runtime data:        00:04
+Entry has been added with handle 3
+RuntimeCmd: Adding entry to exact match table bift
+match key:           EXACT-20
+action:              forward_connected
+runtime data:        00:05
+Entry has been added with handle 4
+RuntimeCmd: Adding entry to lpm match table get_bits_of_interest
+match key:           LPM-00:00:00:00:00:00:00:00/0
+action:              save_bits_of_interest
+runtime data:        00:00:00:00:f0:00:00:20
+Entry has been added with handle 0
+RuntimeCmd: 
+Connectiong to 100.0.0.112:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Adding entry to exact match table bier_ingress
+match key:           EXACT-e0:01:01:01
+action:              add_bier_header
+runtime data:        00:00:00:00:00:02:03:0e
+Entry has been added with handle 0
+RuntimeCmd: Adding entry to exact match table bier_ingress
+match key:           EXACT-e0:01:01:02
+action:              add_bier_header
+runtime data:        00:00:00:00:24:08:23:e0
+Entry has been added with handle 1
+RuntimeCmd: 
+Connectiong to 100.0.0.112:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:00:01 &&& 00:00:00:00:00:00:00:01
+action:              save_bit_pos
+runtime data:        01
+Entry has been added with handle 0
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:00:02 &&& 00:00:00:00:00:00:00:02
+action:              save_bit_pos
+runtime data:        02
+Entry has been added with handle 1
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:00:04 &&& 00:00:00:00:00:00:00:04
+action:              save_bit_pos
+runtime data:        03
+Entry has been added with handle 2
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:00:08 &&& 00:00:00:00:00:00:00:08
+action:              save_bit_pos
+runtime data:        04
+Entry has been added with handle 3
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:00:10 &&& 00:00:00:00:00:00:00:10
+action:              save_bit_pos
+runtime data:        05
+Entry has been added with handle 4
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:00:20 &&& 00:00:00:00:00:00:00:20
+action:              save_bit_pos
+runtime data:        06
+Entry has been added with handle 5
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:00:40 &&& 00:00:00:00:00:00:00:40
+action:              save_bit_pos
+runtime data:        07
+Entry has been added with handle 6
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:00:80 &&& 00:00:00:00:00:00:00:80
+action:              save_bit_pos
+runtime data:        08
+Entry has been added with handle 7
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:01:00 &&& 00:00:00:00:00:00:01:00
+action:              save_bit_pos
+runtime data:        09
+Entry has been added with handle 8
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:02:00 &&& 00:00:00:00:00:00:02:00
+action:              save_bit_pos
+runtime data:        0a
+Entry has been added with handle 9
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:04:00 &&& 00:00:00:00:00:00:04:00
+action:              save_bit_pos
+runtime data:        0b
+Entry has been added with handle 10
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:08:00 &&& 00:00:00:00:00:00:08:00
+action:              save_bit_pos
+runtime data:        0c
+Entry has been added with handle 11
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:10:00 &&& 00:00:00:00:00:00:10:00
+action:              save_bit_pos
+runtime data:        0d
+Entry has been added with handle 12
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:20:00 &&& 00:00:00:00:00:00:20:00
+action:              save_bit_pos
+runtime data:        0e
+Entry has been added with handle 13
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:40:00 &&& 00:00:00:00:00:00:40:00
+action:              save_bit_pos
+runtime data:        0f
+Entry has been added with handle 14
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:00:80:00 &&& 00:00:00:00:00:00:80:00
+action:              save_bit_pos
+runtime data:        10
+Entry has been added with handle 15
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:01:00:00 &&& 00:00:00:00:00:01:00:00
+action:              save_bit_pos
+runtime data:        11
+Entry has been added with handle 16
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:02:00:00 &&& 00:00:00:00:00:02:00:00
+action:              save_bit_pos
+runtime data:        12
+Entry has been added with handle 17
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:04:00:00 &&& 00:00:00:00:00:04:00:00
+action:              save_bit_pos
+runtime data:        13
+Entry has been added with handle 18
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:08:00:00 &&& 00:00:00:00:00:08:00:00
+action:              save_bit_pos
+runtime data:        14
+Entry has been added with handle 19
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:10:00:00 &&& 00:00:00:00:00:10:00:00
+action:              save_bit_pos
+runtime data:        15
+Entry has been added with handle 20
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:20:00:00 &&& 00:00:00:00:00:20:00:00
+action:              save_bit_pos
+runtime data:        16
+Entry has been added with handle 21
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:40:00:00 &&& 00:00:00:00:00:40:00:00
+action:              save_bit_pos
+runtime data:        17
+Entry has been added with handle 22
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:00:80:00:00 &&& 00:00:00:00:00:80:00:00
+action:              save_bit_pos
+runtime data:        18
+Entry has been added with handle 23
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:01:00:00:00 &&& 00:00:00:00:01:00:00:00
+action:              save_bit_pos
+runtime data:        19
+Entry has been added with handle 24
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:02:00:00:00 &&& 00:00:00:00:02:00:00:00
+action:              save_bit_pos
+runtime data:        1a
+Entry has been added with handle 25
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:04:00:00:00 &&& 00:00:00:00:04:00:00:00
+action:              save_bit_pos
+runtime data:        1b
+Entry has been added with handle 26
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:08:00:00:00 &&& 00:00:00:00:08:00:00:00
+action:              save_bit_pos
+runtime data:        1c
+Entry has been added with handle 27
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:10:00:00:00 &&& 00:00:00:00:10:00:00:00
+action:              save_bit_pos
+runtime data:        1d
+Entry has been added with handle 28
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:20:00:00:00 &&& 00:00:00:00:20:00:00:00
+action:              save_bit_pos
+runtime data:        1e
+Entry has been added with handle 29
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:40:00:00:00 &&& 00:00:00:00:40:00:00:00
+action:              save_bit_pos
+runtime data:        1f
+Entry has been added with handle 30
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:00:80:00:00:00 &&& 00:00:00:00:80:00:00:00
+action:              save_bit_pos
+runtime data:        20
+Entry has been added with handle 31
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:01:00:00:00:00 &&& 00:00:00:01:00:00:00:00
+action:              save_bit_pos
+runtime data:        21
+Entry has been added with handle 32
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:02:00:00:00:00 &&& 00:00:00:02:00:00:00:00
+action:              save_bit_pos
+runtime data:        22
+Entry has been added with handle 33
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:04:00:00:00:00 &&& 00:00:00:04:00:00:00:00
+action:              save_bit_pos
+runtime data:        23
+Entry has been added with handle 34
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:08:00:00:00:00 &&& 00:00:00:08:00:00:00:00
+action:              save_bit_pos
+runtime data:        24
+Entry has been added with handle 35
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:10:00:00:00:00 &&& 00:00:00:10:00:00:00:00
+action:              save_bit_pos
+runtime data:        25
+Entry has been added with handle 36
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:20:00:00:00:00 &&& 00:00:00:20:00:00:00:00
+action:              save_bit_pos
+runtime data:        26
+Entry has been added with handle 37
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:40:00:00:00:00 &&& 00:00:00:40:00:00:00:00
+action:              save_bit_pos
+runtime data:        27
+Entry has been added with handle 38
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:00:80:00:00:00:00 &&& 00:00:00:80:00:00:00:00
+action:              save_bit_pos
+runtime data:        28
+Entry has been added with handle 39
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:01:00:00:00:00:00 &&& 00:00:01:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        29
+Entry has been added with handle 40
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:02:00:00:00:00:00 &&& 00:00:02:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        2a
+Entry has been added with handle 41
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:04:00:00:00:00:00 &&& 00:00:04:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        2b
+Entry has been added with handle 42
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:08:00:00:00:00:00 &&& 00:00:08:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        2c
+Entry has been added with handle 43
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:10:00:00:00:00:00 &&& 00:00:10:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        2d
+Entry has been added with handle 44
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:20:00:00:00:00:00 &&& 00:00:20:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        2e
+Entry has been added with handle 45
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:40:00:00:00:00:00 &&& 00:00:40:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        2f
+Entry has been added with handle 46
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:00:80:00:00:00:00:00 &&& 00:00:80:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        30
+Entry has been added with handle 47
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:01:00:00:00:00:00:00 &&& 00:01:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        31
+Entry has been added with handle 48
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:02:00:00:00:00:00:00 &&& 00:02:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        32
+Entry has been added with handle 49
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:04:00:00:00:00:00:00 &&& 00:04:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        33
+Entry has been added with handle 50
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:08:00:00:00:00:00:00 &&& 00:08:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        34
+Entry has been added with handle 51
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:10:00:00:00:00:00:00 &&& 00:10:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        35
+Entry has been added with handle 52
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:20:00:00:00:00:00:00 &&& 00:20:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        36
+Entry has been added with handle 53
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:40:00:00:00:00:00:00 &&& 00:40:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        37
+Entry has been added with handle 54
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-00:80:00:00:00:00:00:00 &&& 00:80:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        38
+Entry has been added with handle 55
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-01:00:00:00:00:00:00:00 &&& 01:00:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        39
+Entry has been added with handle 56
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-02:00:00:00:00:00:00:00 &&& 02:00:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        3a
+Entry has been added with handle 57
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-04:00:00:00:00:00:00:00 &&& 04:00:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        3b
+Entry has been added with handle 58
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-08:00:00:00:00:00:00:00 &&& 08:00:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        3c
+Entry has been added with handle 59
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-10:00:00:00:00:00:00:00 &&& 10:00:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        3d
+Entry has been added with handle 60
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-20:00:00:00:00:00:00:00 &&& 20:00:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        3e
+Entry has been added with handle 61
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-40:00:00:00:00:00:00:00 &&& 40:00:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        3f
+Entry has been added with handle 62
+RuntimeCmd: Adding entry to ternary match table find_bit_pos
+match key:           TERNARY-80:00:00:00:00:00:00:00 &&& 80:00:00:00:00:00:00:00
+action:              save_bit_pos
+runtime data:        40
+Entry has been added with handle 63
+RuntimeCmd: Setting default action of find_bit_pos
+action:              _drop
+runtime data:        
+RuntimeCmd: 
+Connectiong to 100.0.0.112:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Setting default action of do_cloning_table
+action:              do_cloning
+runtime data:        
+RuntimeCmd: 
+Connectiong to 100.0.0.112:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Setting default action of do_clone_recirculation_table
+action:              do_clone_recirculation
+runtime data:        
+RuntimeCmd: 
+Connectiong to 100.0.0.112:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: RuntimeCmd: 
+Connectiong to 100.0.0.112:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Setting default action of do_decap_table
+action:              do_decap
+runtime data:        
+RuntimeCmd: 
+Connectiong to 100.0.0.112:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Setting default action of do_restore_bier_table
+action:              do_restore_bier
+runtime data:        
+RuntimeCmd: 
+Connectiong to 100.0.0.112:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Setting default action of do_frr_recursion
+action:              frr_recursion
+runtime data:        
+RuntimeCmd: 
+Connectiong to 100.0.0.112:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Creating multicast group 1
+RuntimeCmd: Creating node with rid 0 , port map 10 and lag map 
+node was created with handle 0
+RuntimeCmd: Associating node 0 to multicast group 1
+RuntimeCmd: 
+Connectiong to 100.0.0.112:10000
+0
