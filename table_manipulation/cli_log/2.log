@@ -45,7 +45,7 @@ Entry has been added with handle 0
 RuntimeCmd: Adding entry to exact match table bier_ingress
 match key:           EXACT-e0:01:01:02
 action:              add_bier_header
-runtime data:        00:00:00:00:24:08:23:e0
+runtime data:        00:00:00:00:24:0a:23:e8
 Entry has been added with handle 1
 RuntimeCmd: 
 Connectiong to 100.0.0.104:10000
@@ -415,8 +415,35 @@ Connectiong to 100.0.0.104:10000
 Obtaining JSON from switch...
 Done
 Control utility for runtime P4 table manipulation
+RuntimeCmd: Setting default action of do_reinsert_encapsulated
+action:              reinsert_encapsulated
+runtime data:        
+RuntimeCmd: 
+Connectiong to 100.0.0.104:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Setting default action of do_handover_mc_overlay
+action:              handover_mc_overlay
+runtime data:        
+RuntimeCmd: 
+Connectiong to 100.0.0.104:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
 RuntimeCmd: Setting default action of do_restore_bier_table
 action:              do_restore_bier
+runtime data:        
+RuntimeCmd: 
+Connectiong to 100.0.0.104:10000
+0
+Obtaining JSON from switch...
+Done
+Control utility for runtime P4 table manipulation
+RuntimeCmd: Setting default action of do_remove_outer_bier_header
+action:              remove_outer_bier_header
 runtime data:        
 RuntimeCmd: 
 Connectiong to 100.0.0.104:10000
