@@ -21,8 +21,40 @@ control ingress {
 
         apply(frr_indication);
         
+        apply(find_bit_pos) {
+            hit {
+                if(bier_metadata.bit_pos == bier_frr_metadata.bp) {
+                    //aktuelle stelle ist vom Fehler betroffen
+                    if(bier_frr_metadata.BitString == 0) {
+                        apply(frr_copy_bitstring);
+
+                        //hier sehen wir das Paket zum ersten mal, evtl direkt hier Kopie davon erstellen und mit geclearter fehler BP neu verarbeiten
+                    }               
+                    apply(btaft);
+                }
+                else
+                {
+                    //aktuelle stelle ist nicht betroffen
+                    apply(bift) {
+                        local_decap {
+                            if(valid(bier[1])) {
+                                if(bier_frr_metadata.decap_done == 0) {
+                                    apply(do_reinsert_encapsulated);
+                                }
+                            }
+                            else {
+                                apply(do_handover_mc_overlay);
+                            }
+                        }
+                    }
+                }
+
+
+            }
+        }
+
         //falls Fehler ueberhaupt eine Auswirkung hat
-        if(bier_frr_metadata.flow_affected > 0)
+        /*if(bier_frr_metadata.flow_affected > 0)
         {
             if(bier_frr_metadata.BitString == 0) {
                 apply(frr_copy_bitstring);
@@ -37,13 +69,24 @@ control ingress {
             {
                 hit
                 {
-                    apply(bift);
+                    apply(bift) {
+                        local_decap {
+                            if(valid(bier[1])) {
+                                if(bier_frr_metadata.decap_done == 0) {
+                                    apply(do_reinsert_encapsulated);
+                                }
+                            }
+                            else {
+                                apply(do_handover_mc_overlay);
+                            }
+                        }
+                    }
                     //evtl hier, falls locap decap geschah
                     //schauen, ob noch ein bier header da ist und evtl
                     //recirculation durchführen
                 }
             }
-        }
+        }*/
 
     }
     else if(ethernet.etherType == 0x0800)
@@ -111,12 +154,28 @@ control egress {
         apply(send_frame);
     }
     if(bier_metadata.decap == 1) {
-        apply(do_decap_table);
+        if(valid(bier[1])) {
+            //BIER in BIER Paket
+            apply(do_remove_outer_bier_header);
+        }
+        else {
+            apply(do_decap_table);
+        }
     }
     
     apply(print_egress_end);
 }
 
+
+action reinsert_encapsulated() {
+    modify_field(bier_frr_metadata.decap_done, 1);
+    resubmit(bier_FL);
+}
+table do_reinsert_encapsulated {
+    actions {
+        reinsert_encapsulated;
+    }
+}
 
 action save_bp(bp) {
     modify_field(bier_frr_metadata.bp, bp);
@@ -349,6 +408,22 @@ table do_restore_bier_table{
     }
 }
 
+
+action remove_outer_bier_header() {
+    //copy_header(bier[0], bier[1]);
+    remove_header(bier[0]);
+    //reset metadata
+    modify_field(bier_metadata.bits_of_interest, 0);
+
+    modify_field(bier_metadata.decap, 0);
+}
+table do_remove_outer_bier_header {
+    actions {
+        remove_outer_bier_header;
+    }
+}
+
+
 /*
 Falls ein Paket die Domain verlassen soll, muss der etherType
 zurückgesetzt werden und der BIER Header entfernt werden.
@@ -361,6 +436,17 @@ action do_decap() {
 table do_decap_table {
     actions {
         do_decap;
+    }
+}
+
+action handover_mc_overlay() {
+    /* multicast overlay */
+    modify_field(intrinsic_metadata.mcast_grp, 1);
+}   
+
+table do_handover_mc_overlay {
+    actions {
+        handover_mc_overlay;
     }
 }
 
@@ -391,9 +477,6 @@ action local_decap() {
     //modify_field(standard_metadata.egress_spec, 1);
     modify_field(bier_metadata.needs_cloning, 1);
 
-    /* multicast overlay */
-    modify_field(intrinsic_metadata.mcast_grp, 1);
-    
     /*
     Paket muss entsprechend markiert werden, damit der Header später
     entfernt wird

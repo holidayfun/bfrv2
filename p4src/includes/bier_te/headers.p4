@@ -14,6 +14,7 @@ header_type bier_frr_metadata_t {
         add_bm : 64;
         reset_bm : 64;
         bp : 8;
+        decap_done: 1;
         needs_recursion : 1;
         needs_cloning : 1;
         BitString: 64;
