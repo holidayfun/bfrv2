@@ -10,7 +10,10 @@ do
     cli.py -s $i < bier_te/do_clone_recirculation_table >> cli_log/$i.log
     cli.py -s $i < bier_te/mirroring >> cli_log/$i.log
     cli.py -s $i < bier_te/do_decap_table >> cli_log/$i.log
+    cli.py -s $i < bier_te/do_reinsert_encapsulated >> cli_log/$i.log
+    cli.py -s $i < bier_te/do_handover_mc_overlay >> cli_log/$i.log
     cli.py -s $i < bier_te/do_restore_bier_table >> cli_log/$i.log
+    cli.py -s $i < bier_te/do_remove_outer_bier_header >> cli_log/$i.log
     cli.py -s $i < bier_te/do_frr_recursion >> cli_log/$i.log
     #cli.py -s $i < bier_te/mc_overlay_s$i
     cli.py -s $i < bier_te/mc_overlay >> cli_log/$i.log
