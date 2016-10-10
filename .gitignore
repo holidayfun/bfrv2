@@ -2,4 +2,5 @@
 *.pcap
 
 #No log files
-.log
+*.log
+
