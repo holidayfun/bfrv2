@@ -504,8 +504,40 @@
     "meter_arrays": [],
     "actions": [
         {
-            "name": "set_dmac",
+            "name": "frr_recursion",
             "id": 0,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "needs_cloning"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "recirculate",
+                    "parameters": [
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "set_dmac",
+            "id": 1,
             "runtime_data": [
                 {
                     "name": "dmac",
@@ -532,10 +564,26 @@
             ]
         },
         {
-            "name": "remove_outer_bier_header",
-            "id": 1,
+            "name": "do_decap",
+            "id": 2,
             "runtime_data": [],
             "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "ethernet",
+                                "etherType"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x800"
+                        }
+                    ]
+                },
                 {
                     "op": "remove_header",
                     "parameters": [
@@ -544,44 +592,12 @@
                             "value": "bier[0]"
                         }
                     ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "bits_of_interest"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "decap"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
                 }
             ]
         },
         {
             "name": "handover_mc_overlay",
-            "id": 2,
+            "id": 3,
             "runtime_data": [],
             "primitives": [
                 {
@@ -603,23 +619,32 @@
             ]
         },
         {
-            "name": "save_bits_of_interest",
-            "id": 3,
+            "name": "add_bier_header",
+            "id": 4,
             "runtime_data": [
                 {
-                    "name": "bits_of_interest",
+                    "name": "bitstring",
                     "bitwidth": 64
                 }
             ],
             "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "bier[0]"
+                        }
+                    ]
+                },
                 {
                     "op": "modify_field",
                     "parameters": [
                         {
                             "type": "field",
                             "value": [
-                                "bier_metadata",
-                                "bits_of_interest"
+                                "bier[0]",
+                                "BitString"
                             ]
                         },
                         {
@@ -634,29 +659,13 @@
                         {
                             "type": "field",
                             "value": [
-                                "bier_metadata",
-                                "BitString_of_interest"
+                                "ethernet",
+                                "etherType"
                             ]
                         },
                         {
-                            "type": "expression",
-                            "value": {
-                                "type": "expression",
-                                "value": {
-                                    "op": "&",
-                                    "left": {
-                                        "type": "field",
-                                        "value": [
-                                            "bier[0]",
-                                            "BitString"
-                                        ]
-                                    },
-                                    "right": {
-                                        "type": "local",
-                                        "value": 0
-                                    }
-                                }
-                            }
+                            "type": "hexstr",
+                            "value": "0xbbbb"
                         }
                     ]
                 },
@@ -667,54 +676,21 @@
                             "type": "field",
                             "value": [
                                 "bier[0]",
-                                "BitString"
+                                "Proto"
                             ]
                         },
                         {
-                            "type": "expression",
-                            "value": {
-                                "type": "expression",
-                                "value": {
-                                    "op": "&",
-                                    "left": {
-                                        "type": "field",
-                                        "value": [
-                                            "bier[0]",
-                                            "BitString"
-                                        ]
-                                    },
-                                    "right": {
-                                        "type": "expression",
-                                        "value": {
-                                            "op": "~",
-                                            "left": null,
-                                            "right": {
-                                                "type": "local",
-                                                "value": 0
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            "type": "hexstr",
+                            "value": "0x8"
                         }
                     ]
                 },
                 {
-                    "op": "modify_field",
+                    "op": "recirculate",
                     "parameters": [
                         {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "bs_remaining"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier[0]",
-                                "BitString"
-                            ]
+                            "type": "hexstr",
+                            "value": "0x1"
                         }
                     ]
                 }
@@ -722,7 +698,7 @@
         },
         {
             "name": "reinsert_encapsulated",
-            "id": 4,
+            "id": 5,
             "runtime_data": [],
             "primitives": [
                 {
@@ -754,7 +730,7 @@
         },
         {
             "name": "a_r_bm_recursion",
-            "id": 5,
+            "id": 6,
             "runtime_data": [
                 {
                     "name": "add_bm",
@@ -912,107 +888,6 @@
             ]
         },
         {
-            "name": "local_decap",
-            "id": 6,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "BitString_of_interest"
-                            ]
-                        },
-                        {
-                            "type": "expression",
-                            "value": {
-                                "type": "expression",
-                                "value": {
-                                    "op": "&",
-                                    "left": {
-                                        "type": "field",
-                                        "value": [
-                                            "bier_metadata",
-                                            "BitString_of_interest"
-                                        ]
-                                    },
-                                    "right": {
-                                        "type": "expression",
-                                        "value": {
-                                            "op": "~",
-                                            "left": null,
-                                            "right": {
-                                                "type": "expression",
-                                                "value": {
-                                                    "op": "<<",
-                                                    "left": {
-                                                        "type": "hexstr",
-                                                        "value": "0x1"
-                                                    },
-                                                    "right": {
-                                                        "type": "expression",
-                                                        "value": {
-                                                            "op": "-",
-                                                            "left": {
-                                                                "type": "field",
-                                                                "value": [
-                                                                    "bier_metadata",
-                                                                    "bit_pos"
-                                                                ]
-                                                            },
-                                                            "right": {
-                                                                "type": "hexstr",
-                                                                "value": "0x1"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "needs_cloning"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "decap"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "do_clone_recirculation",
             "id": 7,
             "runtime_data": [],
@@ -1064,114 +939,8 @@
             ]
         },
         {
-            "name": "forward_connected",
-            "id": 8,
-            "runtime_data": [
-                {
-                    "name": "nbr_port",
-                    "bitwidth": 9
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "BitString_of_interest"
-                            ]
-                        },
-                        {
-                            "type": "expression",
-                            "value": {
-                                "type": "expression",
-                                "value": {
-                                    "op": "&",
-                                    "left": {
-                                        "type": "field",
-                                        "value": [
-                                            "bier_metadata",
-                                            "BitString_of_interest"
-                                        ]
-                                    },
-                                    "right": {
-                                        "type": "expression",
-                                        "value": {
-                                            "op": "~",
-                                            "left": null,
-                                            "right": {
-                                                "type": "expression",
-                                                "value": {
-                                                    "op": "<<",
-                                                    "left": {
-                                                        "type": "hexstr",
-                                                        "value": "0x1"
-                                                    },
-                                                    "right": {
-                                                        "type": "expression",
-                                                        "value": {
-                                                            "op": "-",
-                                                            "left": {
-                                                                "type": "field",
-                                                                "value": [
-                                                                    "bier_metadata",
-                                                                    "bit_pos"
-                                                                ]
-                                                            },
-                                                            "right": {
-                                                                "type": "hexstr",
-                                                                "value": "0x1"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "needs_cloning"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_spec"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "save_bit_pos",
-            "id": 9,
+            "id": 8,
             "runtime_data": [
                 {
                     "name": "bit_pos",
@@ -1199,7 +968,7 @@
         },
         {
             "name": "rewrite_mac",
-            "id": 10,
+            "id": 9,
             "runtime_data": [
                 {
                     "name": "smac",
@@ -1227,7 +996,7 @@
         },
         {
             "name": "a_r_bm_apply",
-            "id": 11,
+            "id": 10,
             "runtime_data": [],
             "primitives": [
                 {
@@ -1380,29 +1149,17 @@
             ]
         },
         {
-            "name": "frr_recursion",
-            "id": 12,
+            "name": "do_cloning",
+            "id": 11,
             "runtime_data": [],
             "primitives": [
                 {
-                    "op": "modify_field",
+                    "op": "clone_egress_pkt_to_egress",
                     "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier_metadata",
-                                "needs_cloning"
-                            ]
-                        },
                         {
                             "type": "hexstr",
-                            "value": "0x0"
-                        }
-                    ]
-                },
-                {
-                    "op": "recirculate",
-                    "parameters": [
+                            "value": "0x1"
+                        },
                         {
                             "type": "hexstr",
                             "value": "0x1"
@@ -1413,7 +1170,7 @@
         },
         {
             "name": "save_bp",
-            "id": 13,
+            "id": 12,
             "runtime_data": [
                 {
                     "name": "bp",
@@ -1492,7 +1249,55 @@
             ]
         },
         {
-            "name": "do_decap",
+            "name": "remove_outer_bier_header",
+            "id": 13,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "remove_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "bier[0]"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "bits_of_interest"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "decap"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x0"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "local_decap",
             "id": 14,
             "runtime_data": [],
             "primitives": [
@@ -1502,22 +1307,91 @@
                         {
                             "type": "field",
                             "value": [
-                                "ethernet",
-                                "etherType"
+                                "bier_metadata",
+                                "BitString_of_interest"
                             ]
                         },
                         {
-                            "type": "hexstr",
-                            "value": "0x800"
+                            "type": "expression",
+                            "value": {
+                                "type": "expression",
+                                "value": {
+                                    "op": "&",
+                                    "left": {
+                                        "type": "field",
+                                        "value": [
+                                            "bier_metadata",
+                                            "BitString_of_interest"
+                                        ]
+                                    },
+                                    "right": {
+                                        "type": "expression",
+                                        "value": {
+                                            "op": "~",
+                                            "left": null,
+                                            "right": {
+                                                "type": "expression",
+                                                "value": {
+                                                    "op": "<<",
+                                                    "left": {
+                                                        "type": "hexstr",
+                                                        "value": "0x1"
+                                                    },
+                                                    "right": {
+                                                        "type": "expression",
+                                                        "value": {
+                                                            "op": "-",
+                                                            "left": {
+                                                                "type": "field",
+                                                                "value": [
+                                                                    "bier_metadata",
+                                                                    "bit_pos"
+                                                                ]
+                                                            },
+                                                            "right": {
+                                                                "type": "hexstr",
+                                                                "value": "0x1"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     ]
                 },
                 {
-                    "op": "remove_header",
+                    "op": "modify_field",
                     "parameters": [
                         {
-                            "type": "header",
-                            "value": "bier[0]"
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "needs_cloning"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "decap"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
                         }
                     ]
                 }
@@ -1588,8 +1462,34 @@
             ]
         },
         {
-            "name": "do_restore_bier",
+            "name": "save_frr_bitstring",
             "id": 16,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_frr_metadata",
+                                "BitString"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier[0]",
+                                "BitString"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "do_restore_bier",
+            "id": 17,
             "runtime_data": [],
             "primitives": [
                 {
@@ -1655,21 +1555,74 @@
             ]
         },
         {
-            "name": "add_bier_header",
-            "id": 17,
+            "name": "forward_connected",
+            "id": 18,
             "runtime_data": [
                 {
-                    "name": "bitstring",
-                    "bitwidth": 64
+                    "name": "nbr_port",
+                    "bitwidth": 9
                 }
             ],
             "primitives": [
                 {
-                    "op": "add_header",
+                    "op": "modify_field",
                     "parameters": [
                         {
-                            "type": "header",
-                            "value": "bier[0]"
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "BitString_of_interest"
+                            ]
+                        },
+                        {
+                            "type": "expression",
+                            "value": {
+                                "type": "expression",
+                                "value": {
+                                    "op": "&",
+                                    "left": {
+                                        "type": "field",
+                                        "value": [
+                                            "bier_metadata",
+                                            "BitString_of_interest"
+                                        ]
+                                    },
+                                    "right": {
+                                        "type": "expression",
+                                        "value": {
+                                            "op": "~",
+                                            "left": null,
+                                            "right": {
+                                                "type": "expression",
+                                                "value": {
+                                                    "op": "<<",
+                                                    "left": {
+                                                        "type": "hexstr",
+                                                        "value": "0x1"
+                                                    },
+                                                    "right": {
+                                                        "type": "expression",
+                                                        "value": {
+                                                            "op": "-",
+                                                            "left": {
+                                                                "type": "field",
+                                                                "value": [
+                                                                    "bier_metadata",
+                                                                    "bit_pos"
+                                                                ]
+                                                            },
+                                                            "right": {
+                                                                "type": "hexstr",
+                                                                "value": "0x1"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     ]
                 },
@@ -1679,80 +1632,29 @@
                         {
                             "type": "field",
                             "value": [
-                                "bier[0]",
-                                "BitString"
+                                "bier_metadata",
+                                "needs_cloning"
                             ]
                         },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "ethernet",
-                                "etherType"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0xbbbb"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "bier[0]",
-                                "Proto"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x8"
-                        }
-                    ]
-                },
-                {
-                    "op": "recirculate",
-                    "parameters": [
                         {
                             "type": "hexstr",
                             "value": "0x1"
                         }
                     ]
-                }
-            ]
-        },
-        {
-            "name": "save_frr_bitstring",
-            "id": 18,
-            "runtime_data": [],
-            "primitives": [
+                },
                 {
                     "op": "modify_field",
                     "parameters": [
                         {
                             "type": "field",
                             "value": [
-                                "bier_frr_metadata",
-                                "BitString"
+                                "standard_metadata",
+                                "egress_spec"
                             ]
                         },
                         {
-                            "type": "field",
-                            "value": [
-                                "bier[0]",
-                                "BitString"
-                            ]
+                            "type": "runtime_data",
+                            "value": 0
                         }
                     ]
                 }
@@ -1770,20 +1672,118 @@
             ]
         },
         {
-            "name": "do_cloning",
+            "name": "save_bits_of_interest",
             "id": 20,
-            "runtime_data": [],
+            "runtime_data": [
+                {
+                    "name": "bits_of_interest",
+                    "bitwidth": 64
+                }
+            ],
             "primitives": [
                 {
-                    "op": "clone_egress_pkt_to_egress",
+                    "op": "modify_field",
                     "parameters": [
                         {
-                            "type": "hexstr",
-                            "value": "0x1"
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "bits_of_interest"
+                            ]
                         },
                         {
-                            "type": "hexstr",
-                            "value": "0x1"
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "BitString_of_interest"
+                            ]
+                        },
+                        {
+                            "type": "expression",
+                            "value": {
+                                "type": "expression",
+                                "value": {
+                                    "op": "&",
+                                    "left": {
+                                        "type": "field",
+                                        "value": [
+                                            "bier[0]",
+                                            "BitString"
+                                        ]
+                                    },
+                                    "right": {
+                                        "type": "local",
+                                        "value": 0
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier[0]",
+                                "BitString"
+                            ]
+                        },
+                        {
+                            "type": "expression",
+                            "value": {
+                                "type": "expression",
+                                "value": {
+                                    "op": "&",
+                                    "left": {
+                                        "type": "field",
+                                        "value": [
+                                            "bier[0]",
+                                            "BitString"
+                                        ]
+                                    },
+                                    "right": {
+                                        "type": "expression",
+                                        "value": {
+                                            "op": "~",
+                                            "left": null,
+                                            "right": {
+                                                "type": "local",
+                                                "value": 0
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier_metadata",
+                                "bs_remaining"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "bier[0]",
+                                "BitString"
+                            ]
                         }
                     ]
                 }
