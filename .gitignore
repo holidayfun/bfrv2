@@ -1,2 +1,5 @@
 #No pcap files
 *.pcap
+
+#No log files
+.log
