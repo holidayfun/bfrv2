@@ -9,7 +9,7 @@ metadata intrinsic_metadata_t intrinsic_metadata;
 metadata bier_frr_metadata_t bier_frr_metadata;
 
 control ingress {
-    apply(print_ingress_start);
+    //apply(print_ingress_start);
     if(ethernet.etherType == 0xBBBB) {
         /* BIER-TE Paket empfangen */
         /* Filtern der Bits of Interes, Bit Mask steht in Metadaten */
@@ -27,8 +27,6 @@ control ingress {
                     //aktuelle stelle ist vom Fehler betroffen
                     if(bier_frr_metadata.BitString == 0) {
                         apply(frr_copy_bitstring);
-
-                        //hier sehen wir das Paket zum ersten mal, evtl direkt hier Kopie davon erstellen und mit geclearter fehler BP neu verarbeiten
                     }               
                     apply(btaft);
                 }
@@ -48,46 +46,8 @@ control ingress {
                         }
                     }
                 }
-
-
             }
         }
-
-        //falls Fehler ueberhaupt eine Auswirkung hat
-        /*if(bier_frr_metadata.flow_affected > 0)
-        {
-            if(bier_frr_metadata.BitString == 0) {
-                apply(frr_copy_bitstring);
-
-                //hier sehen wir das Paket zum ersten mal, evtl direkt hier Kopie davon erstellen und mit geclearter fehler BP neu verarbeiten
-            }               
-            apply(btaft);
-        }
-        else
-        {
-            apply(find_bit_pos)
-            {
-                hit
-                {
-                    apply(bift) {
-                        local_decap {
-                            if(valid(bier[1])) {
-                                if(bier_frr_metadata.decap_done == 0) {
-                                    apply(do_reinsert_encapsulated);
-                                }
-                            }
-                            else {
-                                apply(do_handover_mc_overlay);
-                            }
-                        }
-                    }
-                    //evtl hier, falls locap decap geschah
-                    //schauen, ob noch ein bier header da ist und evtl
-                    //recirculation durchführen
-                }
-            }
-        }*/
-
     }
     else if(ethernet.etherType == 0x0800)
     {
@@ -111,11 +71,11 @@ control ingress {
             apply(forward);
         }
     }
-    apply(print_ingress_end);
+    //apply(print_ingress_end);
 }
 
 control egress {
-    apply(print_egress_start);
+    //apply(print_egress_start);
     if(standard_metadata.instance_type == 2) {
         /*
         Falls ein egress Klon aus einem decap erzeugt wurde, dann wurde
@@ -137,7 +97,6 @@ control egress {
             bier_frr_metadata.needs_cloning == 1) {
             apply(do_frr_recursion);
         }
-    
     } else if(bier_metadata.needs_cloning == 1 
     or bier_metadata.decap == 1 
     or bier_frr_metadata.needs_recursion == 1 
@@ -162,8 +121,7 @@ control egress {
             apply(do_decap_table);
         }
     }
-    
-    apply(print_egress_end);
+    //apply(print_egress_end);
 }
 
 
@@ -193,12 +151,7 @@ table frr_indication {
     }
 }
 
-
 action a_r_bm_apply() {
-    //evtl muss das hier anders umgesetzt werden.
-    //sonst wird bei nicht noetigen FRR trotzdem ein neuer BIER Header drauf gesetzt und das Paket geht dann ins Leere
-    //evtl falls miss in btaft prüfen, ob reset bzw add 0 sind und falls ja kein header hinzufügen
-
     //apply reset on inner BIER Header
     modify_field(bier.BitString, bier.BitString & ~bier_frr_metadata.reset_bm);
     
@@ -269,8 +222,6 @@ table print_ingress_end {
     }
 }
 
-
-
 table print_egress_start {
     reads {
         bier_frr_metadata.add_bm:exact;
@@ -306,17 +257,14 @@ table print_egress_end {
     }
 }
 
-
 action save_frr_bitstring() {
     modify_field(bier_frr_metadata.BitString, bier.BitString);
 }
-
 table frr_copy_bitstring {
     actions {
         save_frr_bitstring;
     }
 }
-
 
 action save_bits_of_interest(bits_of_interest) {
     modify_field(bier_metadata.bits_of_interest, bits_of_interest);
@@ -329,7 +277,6 @@ action save_bits_of_interest(bits_of_interest) {
     /* save BitString for when the header needs to be reconstructed */
     modify_field(bier_metadata.bs_remaining, bier.BitString);
 }
-
 table get_bits_of_interest {
     reads {
         bier.BitString : lpm;
@@ -348,7 +295,6 @@ werden.
 action do_cloning() {
     clone_egress_pkt_to_egress(1, bier_FL);
 }
-
 table do_cloning_table {
     reads {
         standard_metadata.instance_type: exact;
@@ -358,13 +304,10 @@ table do_cloning_table {
     }
 }
 
-
-
 action frr_recursion() {
     modify_field(bier_metadata.needs_cloning, 0);
     recirculate(bier_FL);
 }
-
 table do_frr_recursion {
     actions {
         frr_recursion;
@@ -401,13 +344,11 @@ action do_restore_bier() {
     modify_field(bier_metadata.decap, 0);
     modify_field(ethernet.etherType, 0xBBBB);
 }
-
 table do_restore_bier_table{
     actions {
         do_restore_bier;
     }
 }
-
 
 action remove_outer_bier_header() {
     //copy_header(bier[0], bier[1]);
@@ -423,7 +364,6 @@ table do_remove_outer_bier_header {
     }
 }
 
-
 /*
 Falls ein Paket die Domain verlassen soll, muss der etherType
 zurückgesetzt werden und der BIER Header entfernt werden.
@@ -432,7 +372,6 @@ action do_decap() {
     modify_field(ethernet.etherType, 0x0800);
     remove_header(bier);
 }
-
 table do_decap_table {
     actions {
         do_decap;
@@ -443,7 +382,6 @@ action handover_mc_overlay() {
     /* multicast overlay */
     modify_field(intrinsic_metadata.mcast_grp, 1);
 }   
-
 table do_handover_mc_overlay {
     actions {
         handover_mc_overlay;
@@ -466,10 +404,7 @@ action forward_connected(nbr_port) {
     */
     modify_field(standard_metadata.egress_spec, nbr_port);
 }
-
 action local_decap() {
-    /* TODO: noch nicht fertig */
-
     modify_field(bier_metadata.BitString_of_interest, bier_metadata.BitString_of_interest & ~ (1 << (bier_metadata.bit_pos - 1)));
     /*
     constraint: Fest an Port 1 schicken
@@ -483,7 +418,6 @@ action local_decap() {
     */
     modify_field(bier_metadata.decap, 1);
 }
-
 table bift {
     reads {
         bier_metadata.bit_pos: exact;
@@ -507,7 +441,6 @@ action add_bier_header(bitstring) {
     modify_field(bier.Proto, 0x08);
     recirculate(bier_FL);
 }
-
 table bier_ingress {
     reads {
         ipv4.dstAddr : exact;
@@ -540,7 +473,6 @@ entsprechend verworfen.
 action save_bit_pos(bit_pos) {
     modify_field(bier_metadata.bit_pos, bit_pos);
 }
-
 table find_bit_pos {
     reads {
         bier_metadata.BitString_of_interest : ternary;
