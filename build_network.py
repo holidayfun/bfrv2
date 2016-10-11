@@ -68,7 +68,7 @@ def main(args):
         net_switch.cmd("ip route del 10.0.0.0/8")
         net_switch.cmd("ip route del 20.0.0.0/8")
         net_switch.cmd("ip route del 20.0.0.0/8")
-        #disable ipv6 to remove neighbouring packets
+        #disable ipv6 to avoid neighbouring packets
         net_switch.cmd("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
         net_switch.cmd("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
         net_switch.cmd("sysctl -w net.ipv6.conf.lo.disable_ipv6=1")
@@ -162,13 +162,10 @@ class P4Router(P4Switch):
     def start( self, controllers ):
         "Start up a new P4 Router"
         args = [self.sw_path]
-        #args.extend( ['--name', self.name] )
-        #args.extend( ['--dpid', self.dpid] )
+
         for port, intf in self.intfs.items():
             if not intf.IP():
                 args.extend( ['-i', str(port) + "@" + intf.name] )
-        #args.extend(['--pd-server', '40.0.0.{0}:{1}'.format(100 + 2 * int(self.dpid), self.thrift_port)] )
-        #args.extend( ['--p4nsdb', '192.168.122.42:6379'] )
 
         if self.pcap_dump:
             args.append( '--pcap')
