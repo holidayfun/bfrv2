@@ -87,22 +87,15 @@ def recv_msgs(socket_addr, client):
     sub.connect(socket_addr)
     sub.setsockopt(nnpy.SUB, nnpy.SUB_SUBSCRIBE, '')
 
-    last_handle = 0
+    last_handle = -1
 
     while True:
         msg = sub.recv()
-
-        if False and len(msg) != 40:
-            print("Unexpected msg size of: " + str(len(msg)))
-            continue
-
         msg_type = get_msg_type(msg)
         msg = msg[4:]
-
         if msg_type[:3] != "PRT":
             print("Unsupported message type: " + msg_type)
             continue
-
         hdr = msg[:8]
         #padding = msg[8:28]
         data = msg[28:]
@@ -111,7 +104,6 @@ def recv_msgs(socket_addr, client):
 
         for i in range(0, num_statuses):
             tup = struct.unpack('ii', data[(0+i*8):(8+i*8)])
-            src = switch_id
             port = tup[0]
             status = tup[1]
             print("{0} Status s{1}: Port {2} is {3}".format(msg_type, src+1, port, "UP" if status else "DOWN"))
@@ -121,10 +113,14 @@ def recv_msgs(socket_addr, client):
             continue
 
         thrift_port = 10000
-        thrift_ip = "100.0.0.{0}".format(102+ 2*src)
-        bit_pos = 8 + 4 * src + port - 1
+        thrift_ip = "100.0.0.{0}".format(102+ 2*switch_id)
+
+        num_switches = 8
+        num_ports = 4
+        bit_pos = num_switches + num_ports * switch_id + port - 1
         if status == 1:
             command = "table_delete frr_indication {0}".format(last_handle)
+            last_handle = -1
         else:
             command = "table_add frr_indication save_bp 0/0 => {0}".format(bit_pos)
         print(command)
@@ -135,15 +131,11 @@ def recv_msgs(socket_addr, client):
 
         ps_echo.stdout.close()
         output = ps_cli.communicate()[0]
-
-        m = re.search("handle (\d+)", output)
-
-        if m:
-            handle = m.group(1)
-            print("Entry handle: " + str(handle))
-            last_handle = handle
-
-
+        match = re.search("handle (\d+)", output)
+        if match:
+            inserted_handle = match.group(1)
+            print("Entry handle: " + str(inserted_handle))
+            last_handle = inserted_handle
 
 def main():
     deprecated_args = ["json"]
