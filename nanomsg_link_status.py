@@ -106,7 +106,7 @@ def recv_msgs(socket_addr, client):
             tup = struct.unpack('ii', data[(0+i*8):(8+i*8)])
             port = tup[0]
             status = tup[1]
-            print("{0} Status s{1}: Port {2} is {3}".format(msg_type, src+1, port, "UP" if status else "DOWN"))
+            print("{0} Status s{1}: Port {2} is {3}".format(msg_type, switch_id+1, port, "UP" if status else "DOWN"))
 
         if num_statuses > 1:
             print("more than one status change, no p4 action is taken")
