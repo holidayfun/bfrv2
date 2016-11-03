@@ -19,8 +19,10 @@
 # Antonin Bas (antonin@barefootnetworks.com)
 #
 #
+from os.path import expanduser
+ = expanduser("~")
 import sys
-sys.path.append("/home/hartmann/behavioral-model/tools")
+sys.path.append(home + "/behavioral-model/tools")
 
 import runtime_CLI
 
