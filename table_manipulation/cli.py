@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
+from os.path import expanduser
+
 #import fileinput
 from subprocess import call
 import sys
@@ -21,8 +23,8 @@ if __name__ == "__main__":
 
     port = args.port
     print('Connectiong to {0}:{1}'.format(ip, port))
-
-    print(call(['/home/hartmann/behavioral-model/targets/bfrv2/cli/sswitch_CLI.py',
+    home = expanduser("~")
+    print(call([home + '/behavioral-model/targets/bfrv2/cli/sswitch_CLI.py',
                 #'--pre', 'SimplePreLAG',
                 '--thrift-port', str(port),
                 '--thrift-ip', ip],
