@@ -2,7 +2,7 @@
 
 for ((i=1;i<=8;i++))
 do
-    echo "inserting entrys for s$i"
+    echo "inserting entries for s$i"
     cli.py -s $i < bier_te/bift_entries_s$i > cli_log/$i.log
     cli.py -s $i < bier_te/bier_ingress >> cli_log/$i.log
     cli.py -s $i < bier_te/find_bit_pos >> cli_log/$i.log
@@ -19,5 +19,3 @@ do
     cli.py -s $i < bier_te/mc_overlay >> cli_log/$i.log
     #cli.py -s $i < ip_forwarding/entries_s$i
 done
-
-
