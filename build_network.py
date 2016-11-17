@@ -162,11 +162,10 @@ class P4Router(P4Switch):
     def start( self, controllers ):
         "Start up a new P4 Router"
         args = [self.sw_path]
-
         for port, intf in self.intfs.items():
             if not intf.IP():
                 args.extend( ['-i', str(port) + "@" + intf.name] )
-
+	
         if self.pcap_dump:
             args.append( '--pcap')
 	if self.thrift_port:
@@ -177,8 +176,6 @@ class P4Router(P4Switch):
 	args.extend(['--device-id', str(self.device_id)])
 	P4Switch.device_id += 1
 	args.append(self.json_path)
-	if self.enable_debugger:
-	    args.append('--debugger')
 
         #logging
         args.extend(['--log-file', self.logfile])
