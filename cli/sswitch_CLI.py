@@ -20,7 +20,7 @@
 #
 #
 from os.path import expanduser
- = expanduser("~")
+home = expanduser("~")
 import sys
 sys.path.append(home + "/behavioral-model/tools")
 
