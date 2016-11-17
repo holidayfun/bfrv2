@@ -2,20 +2,21 @@
 
 for ((i=1;i<=8;i++))
 do
+    mkdir -p cli_log
     echo "inserting entries for s$i"
-    cli.py -s $i < bier_te/bift_entries_s$i > cli_log/$i.log
-    cli.py -s $i < bier_te/bier_ingress >> cli_log/$i.log
-    cli.py -s $i < bier_te/find_bit_pos >> cli_log/$i.log
-    cli.py -s $i < bier_te/do_cloning_table >> cli_log/$i.log
-    cli.py -s $i < bier_te/do_clone_recirculation_table >> cli_log/$i.log
-    cli.py -s $i < bier_te/mirroring >> cli_log/$i.log
-    cli.py -s $i < bier_te/do_decap_table >> cli_log/$i.log
-    cli.py -s $i < bier_te/do_reinsert_encapsulated >> cli_log/$i.log
-    cli.py -s $i < bier_te/do_handover_mc_overlay >> cli_log/$i.log
-    cli.py -s $i < bier_te/do_restore_bier_table >> cli_log/$i.log
-    cli.py -s $i < bier_te/do_remove_outer_bier_header >> cli_log/$i.log
-    cli.py -s $i < bier_te/do_frr_recursion >> cli_log/$i.log
-    #cli.py -s $i < bier_te/mc_overlay_s$i
-    cli.py -s $i < bier_te/mc_overlay >> cli_log/$i.log
-    #cli.py -s $i < ip_forwarding/entries_s$i
+    ./cli.py -s $i < bier_te/bift_entries_s$i > cli_log/$i.log
+    ./cli.py -s $i < bier_te/bier_ingress >> cli_log/$i.log
+    ./cli.py -s $i < bier_te/find_bit_pos >> cli_log/$i.log
+    ./cli.py -s $i < bier_te/do_cloning_table >> cli_log/$i.log
+    ./cli.py -s $i < bier_te/do_clone_recirculation_table >> cli_log/$i.log
+    ./cli.py -s $i < bier_te/mirroring >> cli_log/$i.log
+    ./cli.py -s $i < bier_te/do_decap_table >> cli_log/$i.log
+    ./cli.py -s $i < bier_te/do_reinsert_encapsulated >> cli_log/$i.log
+    ./cli.py -s $i < bier_te/do_handover_mc_overlay >> cli_log/$i.log
+    ./cli.py -s $i < bier_te/do_restore_bier_table >> cli_log/$i.log
+    ./cli.py -s $i < bier_te/do_remove_outer_bier_header >> cli_log/$i.log
+    ./cli.py -s $i < bier_te/do_frr_recursion >> cli_log/$i.log
+    #./cli.py -s $i < bier_te/mc_overlay_s$i
+    ./cli.py -s $i < bier_te/mc_overlay >> cli_log/$i.log
+    #./cli.py -s $i < ip_forwarding/entries_s$i
 done
