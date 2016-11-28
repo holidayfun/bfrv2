@@ -1,25 +1,5 @@
 #!/usr/bin/env python2
 
-# Copyright 2013-present Barefoot Networks, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-#
-# Antonin Bas (antonin@barefootnetworks.com)
-#
-#
-
 import sys
 sys.path.append("/home/hartmann/behavioral-model/tools")
 import nnpy
@@ -87,6 +67,7 @@ def recv_msgs(socket_addr, client):
     sub.connect(socket_addr)
     sub.setsockopt(nnpy.SUB, nnpy.SUB_SUBSCRIBE, '')
 
+    #ID of the last inserted handle
     last_handle = -1
 
     while True:
@@ -96,12 +77,13 @@ def recv_msgs(socket_addr, client):
         if msg_type[:3] != "PRT":
             print("Unsupported message type: " + msg_type)
             continue
+        #extract header and data part
         hdr = msg[:8]
-        #padding = msg[8:28]
         data = msg[28:]
-
+        #extract information from the header
         switch_id, num_statuses = struct.unpack('iI', hdr)
 
+        #unpack status information
         for i in range(0, num_statuses):
             tup = struct.unpack('ii', data[(0+i*8):(8+i*8)])
             port = tup[0]

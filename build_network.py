@@ -8,12 +8,10 @@ from mininet.cli import CLI
 from mininet.node import Node, RemoteController, Switch
 from p4_mininet import P4Switch, P4Host
 import argparse
-#from time import sleep
 import json
 
-
+#load the representation of the network
 network = json.load(open('in_use_network.json', 'r'))
-
 
 def main(args):
     sw_path = args.behavioral_exe
@@ -22,7 +20,6 @@ def main(args):
     json_path = args.json
     pcap_dump = args.pcap_dump
     topo = NetworkTopo(sw_path, json_path, thrift_port, pcap_dump)
-
 
     net = OwnMininet(topo = topo, host= P4Host,
                         switch=P4Router, controller=None)
@@ -137,9 +134,7 @@ class P4Router(P4Switch):
 			device_id=None,
 			enable_debugger=True,
 			**kwargs ):
-        #P4Switch.__init__(self, name, sw_path, json_path, thrift_port,
-	#			pcap_dump, verbose, device_id,
-	#			enable_debugger, **kwargs)
+
         Switch.__init__(self, name, **kwargs)
 
         assert(sw_path)
@@ -165,7 +160,7 @@ class P4Router(P4Switch):
         for port, intf in self.intfs.items():
             if not intf.IP():
                 args.extend( ['-i', str(port) + "@" + intf.name] )
-	
+
         if self.pcap_dump:
             args.append( '--pcap')
 	if self.thrift_port:
